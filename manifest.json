@@ -1,0 +1,15 @@
+{
+	"modules": {
+		"pebble-ui/sdk": "./modules/sdk",
+		"pebble-ui/View": "./modules/View",
+		"pebble-ui/WindowStack": "./modules/WindowStack",
+		"pebble-ui/Menu": "./modules/Menu",
+		"pebble-ui/lists": "./modules/lists",
+		"pebble-ui/StatusBar": "./modules/StatusBar",
+		"pebble-ui/ActionBar": "./modules/ActionBar",
+		"pebble-ui/ProgressLayer": "./modules/ProgressLayer",
+		"pebble-ui/SelectionLayer": "./modules/SelectionLayer",
+		"pebble-ui/dialogs": "./modules/dialogs",
+		"pebble-ui/PinWindow": "./modules/PinWindow"
+	}
+}
