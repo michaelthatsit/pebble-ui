@@ -17,8 +17,11 @@ fitsky workout app; both are kept identical to their C originals.
 
 ## Using it
 
-Add the library to your project (a git submodule or a sibling checkout) and
-map the modules you use from `src/embeddedjs/manifest.json`:
+Add the library to your project (a git submodule at the project root, or a
+sibling checkout) and map the modules you use from
+`src/embeddedjs/manifest.json`. The paths are relative to that file, so a
+submodule at the root is `../../pebble-ui/...` and a sibling checkout
+`../../../pebble-ui/...`:
 
 ```json
 "modules": {
@@ -104,7 +107,7 @@ the machine's heaps (on the watch the code is read from flash instead).
 | `pebble-ui/cards` | `CardMenu`: full-screen colour cards with a name and a category, paged by Up and Down | `new CardMenu({ items: [{ title, subtitle, color }], onSelect })` |
 | `pebble-ui/AdjustWindow` | rows of number fields in SelectionLayers with labels; Select moves down a row, Back up, `onComplete()` | `push(AdjustWindow, { title, rows, onComplete })` |
 | `pebble-ui/InfoScreen` | lines of centred text on a colour, a status line at the bottom; `setLine`, `setStatus` | `push(InfoScreen, { lines, status, background })` |
-| `pebble-ui/BarList` | a titled list of label, bar and value rows | `push(BarList, { title, rows: [{ label, value, text, color }] })` |
+| `pebble-ui/BarList` | a titled list of label, bar and value rows, optionally under a status bar | `push(BarList, { title, rows: [{ label, value, text, color }], statusBar })` |
 | `pebble-ui/colors` | the 64 colours of the palette by their SDK names (opt-in: not in `manifest.json`, map it yourself) | `import { GColor } from "pebble-ui/colors"` |
 
 | `pebble-ui/subtitles` | `SubtitleMenu`: two-line cells (`{ title, subtitle }`, 61 px, as `menu_cell_basic_draw` draws them on these displays) | `new SubtitleMenu({ items, onSelect })` |
@@ -135,6 +138,12 @@ The numbers in `sdk.js`, `Menu.js`, `StatusBar.js`, `ActionBar.js`,
 and of fitsky's C app on the emery and gabbro emulators, compared pixel by
 pixel with this library's output. Anything added should go through the same
 comparison; the example apps have the tooling.
+
+## Skill
+
+[skills/using-pebble-ui](skills/using-pebble-ui/SKILL.md) is a Claude Code
+skill for building apps on the library: scaffolding, windows, the emulator
+memory budget and how to verify. Link it into `~/.claude/skills/`.
 
 ## Examples
 

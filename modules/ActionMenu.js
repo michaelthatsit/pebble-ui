@@ -7,6 +7,9 @@
 //     items: ["Start Workout", "Start Live"], background: GColor.IslamicGreen,
 //     onSelect(index, item) {...} })
 //
+// data: items (strings, or { title, onSelect }), background (the rail's colour,
+// DarkGray), foreground (the selected action's, White), selection (0), onSelect
+//
 // Measured against the firmware on the emulators: a 16 px rail with a 5 px
 // crumb dot at (6, 10) on rect, a 14 px ring on round; items 47 px apart on
 // rect with the group placed from the screen's middle, and on round the
@@ -151,7 +154,7 @@ export default class ActionMenu extends View {
 		super(data);
 		this.items = data.items.map(item => typeof item === "string" ? { title: item } : item);
 		this.selection = data.selection ?? 0;
-		this.background = data.background ?? GColor.White;
+		this.background = data.background ?? GColor.DarkGray;
 		this.foreground = data.foreground ?? GColor.White;
 		this.style = new Style({ font: FONT_KEY.GOTHIC_24_BOLD, color: [GColor.DarkGray, this.foreground], horizontal: ROUND ? "center" : "left", vertical: "top", top: 4 });
 	}
