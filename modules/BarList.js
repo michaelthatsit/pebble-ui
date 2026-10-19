@@ -8,9 +8,11 @@
 // Layout (fitsky's): title Gothic 18 Bold at the top; rows from y 32, each
 // (h - 40) / n tall with 4 px between; labels 26 px wide in Gothic 14 Bold,
 // values 46 px wide in Gothic 14, the bar between them with 2 px corners.
-// With statusBar (true, or { color }) a pebble-ui/StatusBar sits above and the
-// layout starts under it; map that module too.
+// With statusBar (true, or { color }) a StatusBar sits above and the layout
+// starts under it (pebble-ui/StatusBar must be mapped either way: a module
+// cannot be imported from inside a Piu template).
 import { PBL_IF_COLOR_ELSE, STATUS_BAR_LAYER_HEIGHT, GColor, FONT_KEY, textLayerStyle } from "pebble-ui/sdk";
+import { StatusBar } from "pebble-ui/StatusBar";
 import { ProgressLayer } from "pebble-ui/ProgressLayer";
 import View from "pebble-ui/View";
 
@@ -25,7 +27,7 @@ const BarListContainer = Container.template($ => {
 		Label($, { left: 0, right: 0, top: top + 4, height: 24, style: textLayerStyle(FONT_KEY.GOTHIC_18_BOLD, $.color, "center"), string: $.title ?? "" }),
 	];
 	if ($.statusBar)
-		contents.push(importNow("pebble-ui/StatusBar").StatusBar({ color: $.statusBar.color ?? $.color }));
+		contents.push(StatusBar({ color: $.statusBar.color ?? $.color }));
 	$.rows.forEach((row, i) => {
 		const y = barY + i * (barH + 4);
 		contents.push(Label($, { left: 4, width: labelW, top: y, height: barH, style: labelStyle, string: row.label ?? "" }));

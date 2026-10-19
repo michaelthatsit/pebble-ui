@@ -26,6 +26,7 @@
 			"./main",
 			"./windows/*"
 		],
-		"pebble-ui/subtitles": "../../../../modules/subtitles"
+		"pebble-ui/subtitles": "../../../../modules/subtitles",
+		"pebble-ui/StatusBar": "../../../../modules/StatusBar"
 	}
 }

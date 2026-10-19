@@ -96,11 +96,12 @@ function listData(data) {
 	const count = items.length;
 	if (data.submit !== null)
 		items.push({ title: data.submit ?? "Submit", submit: true });
-	return {
+	const menu = {
 		...data, items,
 		Item: function($, it) { return $.index < count ? ListRow($, it) : MenuItem($, it); }, // a function, not an arrow: Menu calls it with new
-		onSelect: undefined,
 	};
+	delete menu.onSelect; // the behavior's onSelect handles rows
+	return menu;
 }
 
 class ListBehavior extends Menu.Behavior {

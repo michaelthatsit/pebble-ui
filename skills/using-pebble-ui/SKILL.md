@@ -14,7 +14,7 @@ read those, this skill is the workflow around them.
 ## Scaffold
 
 ```sh
-pebble new-project --alloy myapp && cd myapp
+pebble new-project --alloy myapp && cd myapp     # creates myapp; it refuses a directory that exists
 git init && git submodule add https://github.com/michaelthatsit/pebble-ui.git pebble-ui
 ```
 
@@ -62,8 +62,10 @@ import at the top of the file.
 Dependencies to map alongside: everything needs `sdk`, `View`, `WindowStack`;
 `dialogs` needs `ActionBar`; `PinWindow` needs `SelectionLayer` and
 `StatusBar`; `AdjustWindow` needs `SelectionLayer`; `BarList` needs
-`ProgressLayer`; `lists`, `cards` and `subtitles` need `Menu`; `LongPress`
-needs `View`.
+`ProgressLayer` and `StatusBar`; `lists`, `cards` and `subtitles` need
+`Menu`; `LongPress` needs `View`. A module cannot be imported from inside a
+Piu template (`importNow` there throws `No contents!`): import it at the top
+of the file, or look it up in a button handler.
 
 A window of your own is a `View` subclass: its `Template` builds the screen,
 its `Behavior` gets `onPressUp/Down/Select/Back` and the `onRelease...`
@@ -74,8 +76,12 @@ fonts a few pixels higher and the style corrects it. Icons are
 `bitmapSkin(id)` with `id` the 1-based position in `resources.media`, made per
 window, never at module scope. Give `ActionMenu` a `background` colour (the
 rail), and `StatsScreen` a `background` when the text should be white.
-`sdk`'s `GColor` has only the colours the SDK's own UI uses; for others map
-`pebble-ui/colors` (2 kB) or write the hex. Data shapes that trip people up:
+`sdk`'s `GColor` has only the colours the SDK's own UI uses (Black, White,
+the greys, Red, DarkCandyAppleRed, Yellow, JaegerGreen, BlueMoon):
+`GColor.Blue`, `GColor.Orange`, `GColor.Purple` are undefined there, and a
+window given an undefined option throws `pebble-ui: background is
+undefined` at launch. For other colours map `pebble-ui/colors` (2 kB) or
+write the hex (`"#0000FF"`). Data shapes that trip people up:
 `CheckboxList` takes `items` as strings and calls `onSubmit(checked)` with
 booleans; `Menu.onSelect(index, item)` gets your item object back; `PinWindow`
 calls `onComplete(digits)` with numbers once Select leaves the last cell, and
@@ -96,22 +102,35 @@ code is in flash and 40 kB roomier than the emulator.
 
 ## Verify on the emulator
 
+`pebble-ui/tools/` has the loop as scripts; run them with their interpreter:
+
 ```sh
-pebble build && pebble install --emulator emery
-(timeout 300 pebble logs --emulator emery > app.log &)   # console.log lines show as xsHost.c
-pebble emu-button --emulator emery click down            # back, up, select, down
-pebble screenshot --no-open --emulator emery shot.png
-pebble kill
+pebble build
+bash pebble-ui/tools/tour.sh . emery shots steps.txt   # installs, runs the steps, logs to shots/log.txt
+python3 pebble-ui/tools/describe.py shots/home.png     # the screen in numbers: background, text bands
+python3 pebble-ui/tools/sheet.py all.png shots/*.png   # one labelled image of every frame
+python3 pebble-ui/tools/diff.py mine.png theirs.png    # pixels differing, and their rows
 ```
 
-`pebble install --logs` and `pebble logs` block, so run them in the
-background with a timeout longer than the session; `pebble kill` ends them
-with a WebSocket traceback that is not an app error. Screenshot animated
-screens (the message dialog, action menus) 3 s after opening: the first
-open also loads the module, and the emulator commands are slow.
-`QemuInboundPacket` warnings in the log are noise. When
-recreating a C screen, build the C app for the same emulator and diff the
-PNGs with PIL; zero pixels differing is the bar the library meets.
+A steps file is one step per line: `shot home`, `click down`, `click select
+3` (the wait in seconds), `wait 2`. By hand instead: `pebble install
+--emulator emery`, `pebble emu-button --emulator emery click <back|up|select|down>`,
+`pebble screenshot --no-open --emulator emery shot.png`, `pebble kill`.
+`emu-button` and `kill` print nothing on success. `pebble install --logs`
+and `pebble logs` block, so run them in the background with a timeout
+longer than the session; `pebble kill` ends them with a WebSocket traceback
+that is not an app error. Screenshot animated screens (the message dialog,
+action menus) 3 s after opening: the first open also loads the module, and
+the emulator commands are slow. `QemuInboundPacket` warnings in the log are
+noise. Check a screen you cannot look at with `describe.py`: text comes out
+as bands of rows at the columns it occupies, so a Label at `top: 44` in
+Gothic 18 Bold shows as a band starting at row 51. When recreating a C
+screen, build the C app for the same emulator, tour it the same way and
+`diff.py` the frames; zero pixels differing is the bar the library meets.
+
+On the watch: in the phone app's watch settings turn on the LAN developer
+connection, note the IP it shows, then `pebble install --phone <ip>` and
+`pebble logs --phone <ip>`.
 
 ## Common mistakes
 

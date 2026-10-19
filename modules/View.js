@@ -36,6 +36,11 @@ class ViewBehavior extends Behavior {
 class View {
 	static get Behavior() { return ViewBehavior }
 	constructor(data = {}) {
+		// An option that is undefined is a mistake (GColor.Blue is not in sdk's
+		// palette, for one); a widget would silently take its default instead.
+		for (const key in data)
+			if (data[key] === undefined)
+				throw new Error("pebble-ui: " + key + " is undefined");
 		this.data = data;
 	}
 	// Drops the view's references to Piu contents, so a view in history holds no screen.

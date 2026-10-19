@@ -12,6 +12,8 @@ export const STATUS_BAR_LAYER_HEIGHT = 20;
 
 // The colours the SDK's own UI uses, by their SDK names (pebble-ui/colors has
 // all 64 of the palette; it costs 2 kB of compiled code, so it is opt-in).
+// Any other name (GColor.Blue, GColor.Orange...) is undefined here, and a
+// window given an undefined option throws rather than take its default.
 export const GColor = Object.freeze({
 	Clear: "transparent",
 	Black: "#000000", DarkGray: "#555555", LightGray: "#AAAAAA", White: "#FFFFFF",

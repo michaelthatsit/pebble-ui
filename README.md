@@ -50,8 +50,8 @@ once, include the library's manifest instead, which lists all the modules:
 `sdk`, `View` and `WindowStack` are needed by all the widgets; the rest are
 independent of each other (`lists` and `cards` need `Menu`, `dialogs` needs
 `ActionBar`, `PinWindow` needs `SelectionLayer` and `StatusBar`,
-`AdjustWindow` needs `SelectionLayer`, `BarList` needs `ProgressLayer`,
-`subtitles` and `cards` need `Menu`, `LongPress` needs `View`).
+`AdjustWindow` needs `SelectionLayer`, `BarList` needs `ProgressLayer` and
+`StatusBar`, `subtitles` and `cards` need `Menu`, `LongPress` needs `View`).
 
 Every module an app imports stays resident, so open windows by module name
 (`push("pebble-ui/ActionMenu", data)`) rather than importing them all up
@@ -130,6 +130,18 @@ Each module's header comment documents its data and defaults.
   skin does).
 - Nothing here is drawn from image resources of its own: the tick and the
   radio circles are coverage tables sampled from the firmware's output.
+- A window given an option that is `undefined` throws at construction
+  (`pebble-ui: background is undefined`) rather than take its default:
+  `GColor.Blue` is not in `sdk`'s palette, and that mistake used to pass
+  silently.
+
+## Tools
+
+`tools/` has the verification loop as scripts: `tour.sh` installs an app in
+an emulator and runs a steps file of clicks and screenshots, `describe.py`
+prints a screenshot's background and text bands so a screen can be checked
+in numbers, `sheet.py` lays frames out on one labelled image, and `diff.py`
+counts the pixels two frames differ by. The skill shows how they fit together.
 
 ## Measured, not assumed
 
