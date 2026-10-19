@@ -18,7 +18,21 @@ fitsky workout app; both are kept identical to their C originals.
 ## Using it
 
 Add the library to your project (a git submodule or a sibling checkout) and
-include its manifest from `src/embeddedjs/manifest.json`:
+map the modules you use from `src/embeddedjs/manifest.json`:
+
+```json
+"modules": {
+	"pebble-ui/sdk": "../../pebble-ui/modules/sdk",
+	"pebble-ui/View": "../../pebble-ui/modules/View",
+	"pebble-ui/WindowStack": "../../pebble-ui/modules/WindowStack",
+	"pebble-ui/Menu": "../../pebble-ui/modules/Menu"
+}
+```
+
+Every module in a manifest is compiled into the app whether imported or not,
+and compiled code is memory on the watch (and more so in the emulator, which
+copies it into the app heap), so this is the normal way. To try everything at
+once, include the library's manifest instead, which lists all the modules:
 
 ```json
 {
@@ -27,20 +41,6 @@ include its manifest from `src/embeddedjs/manifest.json`:
 		"../../pebble-ui/manifest.json"
 	],
 	"modules": { "*": ["./main", "./windows/*"] }
-}
-```
-
-Every module in the manifest is compiled into the app whether imported or not,
-and compiled code is memory on the watch (and more so in the emulator, which
-copies it into the app heap). To take only what you use, map the modules
-yourself instead of including the manifest:
-
-```json
-"modules": {
-	"pebble-ui/sdk": "../../pebble-ui/modules/sdk",
-	"pebble-ui/View": "../../pebble-ui/modules/View",
-	"pebble-ui/WindowStack": "../../pebble-ui/modules/WindowStack",
-	"pebble-ui/Menu": "../../pebble-ui/modules/Menu"
 }
 ```
 
