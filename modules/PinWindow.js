@@ -2,7 +2,7 @@
 // screen, a line under it, and the status bar.
 //
 //   stack.push(PinWindow, { onComplete(digits) {...} })
-//   data: onComplete(digits), numCells (3), maxValue (9), cellWidth (40), cellPadding (4),
+//   data: onComplete(digits), numCells (3), maxValue (9),
 //   title ("PIN Required"), subtitle ("Enter your PIN to continue"),
 //   highlightColor (Red), inactiveColor (DarkGray)
 import { GColor, FONT_KEY, textLayerStyle } from "pebble-ui/sdk";
@@ -10,7 +10,9 @@ import { SelectionLayer } from "pebble-ui/SelectionLayer";
 import { StatusBar } from "pebble-ui/StatusBar";
 import View from "pebble-ui/View";
 
+const CELL_WIDTH = 40;
 const CELL_HEIGHT = 34;
+const CELL_PADDING = 4;
 // The texts keep their distances to the cells from the original 168 px layout.
 const TITLE_ABOVE = 37;
 const SUBTITLE_BELOW = 14;
@@ -25,7 +27,7 @@ class PinWindowBehavior extends View.Behavior {
 }
 
 const PinWindowContainer = Container.template($ => {
-	const width = $.numCells * $.cellWidth + ($.numCells - 1) * $.cellPadding;
+	const width = $.numCells * CELL_WIDTH + ($.numCells - 1) * CELL_PADDING;
 	const top = (screen.height - CELL_HEIGHT) >> 1;
 	return {
 		skin: new Skin({ fill: GColor.White }), Behavior: $.constructor.Behavior,
@@ -34,8 +36,8 @@ const PinWindowContainer = Container.template($ => {
 			Text($, { left: 5, right: 5, top: top + CELL_HEIGHT + SUBTITLE_BELOW, bottom: 10, style: textStyle, string: $.subtitle }),
 			SelectionLayer({
 				numCells: $.numCells,
-				cellWidths: new Array($.numCells).fill($.cellWidth),
-				cellPadding: $.cellPadding,
+				cellWidths: new Array($.numCells).fill(CELL_WIDTH),
+				cellPadding: CELL_PADDING,
 				activeBackgroundColor: $.highlightColor,
 				inactiveBackgroundColor: $.inactiveColor,
 				callbacks: $.callbacks(),
@@ -51,8 +53,6 @@ export default class PinWindow extends View {
 		super(data);
 		this.numCells = data.numCells ?? 3;
 		this.maxValue = data.maxValue ?? 9;
-		this.cellWidth = data.cellWidth ?? 40;
-		this.cellPadding = data.cellPadding ?? 4;
 		this.title = data.title ?? "PIN Required";
 		this.subtitle = data.subtitle ?? "Enter your PIN to continue";
 		this.highlightColor = data.highlightColor ?? GColor.Red;

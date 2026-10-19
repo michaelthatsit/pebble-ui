@@ -73,14 +73,16 @@ export default class Home extends Menu {
 ```
 
 The JavaScript machine's default 32 kB is too small for Piu apps of any size;
-see the reference app's `src/c/mdbl.c` for working heap sizes.
+see the reference app's `src/c/mdbl.c` for working heap sizes, and its README
+for how the emulator's 122 kB app heap is shared between the compiled code and
+the machine's heaps (on the watch the code is read from flash instead).
 
 ## Modules
 
 | Module | What | Construct |
 | --- | --- | --- |
-| `pebble-ui/sdk` | `ACTION_BAR_WIDTH`, `STATUS_BAR_LAYER_HEIGHT`, menu cell heights, `GColor` (the 64 colours), `FONT_KEY`, `PBL_IF_COLOR_ELSE`, `PBL_IF_ROUND_ELSE`, `textLayerStyle()`, `bitmapSkin()`, `solidSkin()` | import what you need |
-| `pebble-ui/WindowStack` | the window stack, as the Application's behavior; `push(View, data)`, `pop(count)`, `popAll()`, `depth`, `WindowStack.current` | `new WindowStack` |
+| `pebble-ui/sdk` | `ACTION_BAR_WIDTH`, `STATUS_BAR_LAYER_HEIGHT`, menu cell heights, `GColor` (the colours the SDK's UI uses; `pebble-ui/colors`, opt-in, has all 64), `FONT_KEY`, `PBL_IF_COLOR_ELSE`, `PBL_IF_ROUND_ELSE`, `textLayerStyle()`, `bitmapSkin()`, `solidSkin()` | import what you need |
+| `pebble-ui/WindowStack` | the window stack, as the Application's behavior; `push(View, data)`, `pop(count)`, `depth`, `WindowStack.current` | `new WindowStack` |
 | `pebble-ui/View` | a window: `Template` builds it, `Behavior` gets the buttons (`onPressUp/Down/Select/Back`, `onRelease...`); Back pops | subclass |
 | `pebble-ui/Menu` | MenuLayer: `items`, `onSelect(index, item)`, `cellHeight`, `normal` and `highlight` colours, custom `Item` rows; a window, or embedded with `new menu.Template(menu, {...})` | `new Menu({...})` |
 | `pebble-ui/lists` | `CheckboxList` (`checked`, `onChange`, `onSubmit(checked)`) and `RadioList` (`choice`, `onChange`, `onSubmit(choice)`), with the SDK's box, tick and circles | `new CheckboxList({...})` |

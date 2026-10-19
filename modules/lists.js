@@ -11,9 +11,10 @@
 import { GColor } from "pebble-ui/sdk";
 import Menu, { MenuTitle, MenuItem } from "pebble-ui/Menu";
 
-// Checkbox: the box at x = width - 2 * BOX, vertically centred; the tick 3 px above it.
+// Checkbox: a 12 px box at x = width - 2 * BOX, vertically centred, with the
+// 16 px tick drawn from 3 px above the box. One Port, 16 x 18, holds both.
 const BOX = 12;
-const TICK = [ // tick_black.png from pebble-examples/ui-patterns, 16 x 16
+const TICK = [ // tick_black.png from pebble-examples/ui-patterns, 16 x 16 (strings stay in the read-only archive)
 	"0000000000000000",
 	"0000000000000000",
 	"0000000000000100",
@@ -73,18 +74,96 @@ function drawTable(port, levels, rows, left, top) {
 	}
 }
 
+// A row's accessory is its last content, a Port the list draws into; it is
+// placed from the row's height (which changes with the selection on round)
+// and redrawn on every reload.
 class AccessoryBehavior extends Behavior {
-	onCreate(port) {
-		this.highlighted = false;
-		this.on = false;
+	onCreate(port, $) {
+		this.$ = $;
+	}
+	onDraw(port) {
+		const menu = this.$.menu;
+		menu.drawAccessory(port, this.highlighted, menu.isOn(this.$.index));
 	}
 }
 
-class TickBehavior extends AccessoryBehavior {
-	onDraw(port) {
-		if (!this.on)
+class RowBehavior extends Behavior {
+	onCreate(row, $) {
+		this.$ = $;
+	}
+	onReload(row, highlighted, height) {
+		const port = row.last;
+		port.coordinates = this.$.menu.accessoryFrame(height);
+		port.behavior.highlighted = highlighted;
+		port.invalidate();
+	}
+}
+
+const ListRow = Container.template($ => ({
+	left: 0, right: 0, Behavior: RowBehavior,
+	contents: [
+		MenuTitle($),
+		Port($, { right: 0, top: 0, width: 1, height: 1, Behavior: AccessoryBehavior }),
+	],
+}));
+
+function listData(data) {
+	const items = data.items.map(item => typeof item === "string" ? { title: item } : item);
+	const count = items.length;
+	if (data.submit !== null)
+		items.push({ title: data.submit ?? "Submit", submit: true });
+	return {
+		...data, items,
+		Item: function($, it) { return $.index < count ? ListRow($, it) : MenuItem($, it); }, // a function, not an arrow: Menu calls it with new
+		onSelect: undefined,
+	};
+}
+
+class ListBehavior extends Menu.Behavior {
+	onSelect(menu, index, item) {
+		const view = this.view;
+		if (item.submit) {
+			if (view.data.onSubmit)
+				view.data.onSubmit(view.value);
+		}
+		else {
+			view.pick(index);
+			if (view.data.onChange)
+				view.data.onChange(index, view.isOn(index));
+			this.reload(menu);
+		}
+		return true;
+	}
+}
+
+export class CheckboxList extends Menu {
+	static get Behavior() { return ListBehavior }
+	constructor(data) {
+		super(listData(data));
+		this.checked = data.checked ? data.checked.slice() : new Array(data.items.length).fill(false);
+	}
+	get value() {
+		return this.checked;
+	}
+	isOn(index) {
+		return this.checked[index];
+	}
+	pick(index) {
+		this.checked[index] = !this.checked[index];
+	}
+	// The box at (width - 2 * BOX, height / 2 - BOX / 2); the port starts 3 px above it.
+	accessoryFrame(height) {
+		return { right: 2 * BOX - 16, top: (height >> 1) - (BOX >> 1) - 3, width: 16, height: BOX + 6 };
+	}
+	drawAccessory(port, highlighted, on) {
+		const color = highlighted ? GColor.White : GColor.Black;
+		// graphics_draw_rect: the one pixel outline of the box, 3 px down
+		port.fillColor(color, 0, 3, BOX, 1);
+		port.fillColor(color, 0, 3 + BOX - 1, BOX, 1);
+		port.fillColor(color, 0, 3, 1, BOX);
+		port.fillColor(color, BOX - 1, 3, 1, BOX);
+		if (!on)
 			return;
-		const color = this.highlighted ? GColor.White : GColor.Black;
 		for (let y = 0; y < TICK.length; y++) {
 			const row = TICK[y];
 			for (let x = 0; x < row.length;) {
@@ -101,120 +180,29 @@ class TickBehavior extends AccessoryBehavior {
 	}
 }
 
-class RadioBehavior extends AccessoryBehavior {
-	onDraw(port) {
-		const levels = this.highlighted ? PAPER_LEVELS : INK_LEVELS;
-		drawTable(port, levels, RING, 0, 0);
-		if (this.on)
-			drawTable(port, levels, DOT, RADIUS - 3, RADIUS - 3);
-	}
-}
-
-class RowBehavior extends Behavior {
-	onCreate(row, $) {
-		this.$ = $;
-	}
-	onReload(row, highlighted) {
-		const port = row.last.last;
-		port.behavior.highlighted = highlighted;
-		port.behavior.on = this.$.menu.isOn(this.$.index);
-		port.invalidate();
-	}
-}
-
-const boxSkin = new Skin({ fill: GColor.Clear, stroke: [GColor.Black, GColor.White], borders: { left: 1, right: 1, top: 1, bottom: 1 } });
-
-const CheckboxRow = Container.template($ => ({
-	left: 0, right: 0, Behavior: RowBehavior,
-	contents: [
-		MenuTitle($),
-		Container($, {
-			right: 2 * BOX - 16, width: 16, height: BOX + 6, // 18 tall and centred: the box at h/2 - 6, the tick 3 px above
-			contents: [
-				Content($, { left: 0, top: 3, width: BOX, height: BOX, skin: boxSkin }),
-				Port($, { left: 0, top: 0, width: 16, height: 16, Behavior: TickBehavior }),
-			],
-		}),
-	],
-}));
-
-const RadioRow = Container.template($ => ({
-	left: 0, right: 0, Behavior: RowBehavior,
-	contents: [
-		MenuTitle($),
-		Container($, {
-			right: 4 * RADIUS - DIAMETER, width: DIAMETER, height: DIAMETER + 1, // the circle centred at (width - 3 * radius, height / 2)
-			contents: [
-				Port($, { left: 0, top: 1, width: DIAMETER, height: DIAMETER, Behavior: RadioBehavior }),
-			],
-		}),
-	],
-}));
-
-function listData(data, Row) {
-	const items = data.items.map(item => typeof item === "string" ? { title: item } : item);
-	const count = items.length;
-	if (data.submit !== null)
-		items.push({ title: data.submit ?? "Submit", submit: true });
-	return {
-		...data, items,
-		Item: function($, it) { return $.index < count ? Row($, it) : MenuItem($, it); }, // a function, not an arrow: Menu calls it with new
-		onSelect: undefined,
-	};
-}
-
-class CheckboxBehavior extends Menu.Behavior {
-	onSelect(menu, index, item) {
-		const view = this.view;
-		if (item.submit) {
-			if (view.data.onSubmit)
-				view.data.onSubmit(view.checked);
-		}
-		else {
-			view.checked[index] = !view.checked[index];
-			if (view.data.onChange)
-				view.data.onChange(index, view.checked[index]);
-			this.reload(menu);
-		}
-		return true;
-	}
-}
-
-export class CheckboxList extends Menu {
-	static get Behavior() { return CheckboxBehavior }
-	constructor(data) {
-		super(listData(data, CheckboxRow));
-		this.checked = data.checked ? data.checked.slice() : new Array(data.items.length).fill(false);
-	}
-	isOn(index) {
-		return this.checked[index];
-	}
-}
-
-class RadioBehaviorList extends Menu.Behavior {
-	onSelect(menu, index, item) {
-		const view = this.view;
-		if (item.submit) {
-			if (view.data.onSubmit)
-				view.data.onSubmit(view.choice);
-		}
-		else {
-			view.choice = index;
-			if (view.data.onChange)
-				view.data.onChange(index);
-			this.reload(menu);
-		}
-		return true;
-	}
-}
-
 export class RadioList extends Menu {
-	static get Behavior() { return RadioBehaviorList }
+	static get Behavior() { return ListBehavior }
 	constructor(data) {
-		super(listData(data, RadioRow));
+		super(listData(data));
 		this.choice = data.choice ?? 0;
+	}
+	get value() {
+		return this.choice;
 	}
 	isOn(index) {
 		return this.choice === index;
+	}
+	pick(index) {
+		this.choice = index;
+	}
+	// The circle centred at (width - 3 * RADIUS, height / 2).
+	accessoryFrame(height) {
+		return { right: 3 * RADIUS - RADIUS - 1, top: (height >> 1) - RADIUS, width: DIAMETER, height: DIAMETER };
+	}
+	drawAccessory(port, highlighted, on) {
+		const levels = highlighted ? PAPER_LEVELS : INK_LEVELS;
+		drawTable(port, levels, RING, 0, 0);
+		if (on)
+			drawTable(port, levels, DOT, RADIUS - 3, RADIUS - 3);
 	}
 }

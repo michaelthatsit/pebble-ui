@@ -11,29 +11,14 @@ export const ACTION_BAR_WIDTH = PBL_IF_ROUND_ELSE(40, 34);
 export const STATUS_BAR_LAYER_HEIGHT = 20;
 export const MENU_CELL_BASIC_CELL_HEIGHT = 44;
 export const MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT = 68;
-export const MENU_CELL_ROUND_FOCUSED_TALL_CELL_HEIGHT = 84;
-export const MENU_CELL_ROUND_UNFOCUSED_SHORT_CELL_HEIGHT = 24;
 export const MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT = 32;
 
-// The 64 colours of the Pebble palette, by their SDK names, plus Clear.
+// The colours the SDK's own UI uses, by their SDK names (pebble-ui/colors has
+// all 64 of the palette; it costs 2 kB of compiled code, so it is opt-in).
 export const GColor = Object.freeze({
 	Clear: "transparent",
-	Black: "#000000", OxfordBlue: "#000055", DukeBlue: "#0000AA", Blue: "#0000FF",
-	DarkGreen: "#005500", MidnightGreen: "#005555", CobaltBlue: "#0055AA", BlueMoon: "#0055FF",
-	IslamicGreen: "#00AA00", JaegerGreen: "#00AA55", TiffanyBlue: "#00AAAA", VividCerulean: "#00AAFF",
-	Green: "#00FF00", Malachite: "#00FF55", MediumSpringGreen: "#00FFAA", Cyan: "#00FFFF",
-	BulgarianRose: "#550000", ImperialPurple: "#550055", Indigo: "#5500AA", ElectricUltramarine: "#5500FF",
-	ArmyGreen: "#555500", DarkGray: "#555555", Liberty: "#5555AA", VeryLightBlue: "#5555FF",
-	KellyGreen: "#55AA00", MayGreen: "#55AA55", CadetBlue: "#55AAAA", PictonBlue: "#55AAFF",
-	BrightGreen: "#55FF00", ScreaminGreen: "#55FF55", MediumAquamarine: "#55FFAA", ElectricBlue: "#55FFFF",
-	DarkCandyAppleRed: "#AA0000", JazzberryJam: "#AA0055", Purple: "#AA00AA", VividViolet: "#AA00FF",
-	WindsorTan: "#AA5500", RoseVale: "#AA5555", Purpureus: "#AA55AA", LavenderIndigo: "#AA55FF",
-	Limerick: "#AAAA00", Brass: "#AAAA55", LightGray: "#AAAAAA", BabyBlueEyes: "#AAAAFF",
-	SpringBud: "#AAFF00", Inchworm: "#AAFF55", MintGreen: "#AAFFAA", Celeste: "#AAFFFF",
-	Red: "#FF0000", Folly: "#FF0055", FashionMagenta: "#FF00AA", Magenta: "#FF00FF",
-	Orange: "#FF5500", SunsetOrange: "#FF5555", BrilliantRose: "#FF55AA", ShockingPink: "#FF55FF",
-	ChromeYellow: "#FFAA00", Rajah: "#FFAA55", Melon: "#FFAAAA", RichBrilliantLavender: "#FFAAFF",
-	Yellow: "#FFFF00", Icterine: "#FFFF55", PastelYellow: "#FFFFAA", White: "#FFFFFF",
+	Black: "#000000", DarkGray: "#555555", LightGray: "#AAAAAA", White: "#FFFFFF",
+	Red: "#FF0000", DarkCandyAppleRed: "#AA0000", Yellow: "#FFFF00", JaegerGreen: "#00AA55", BlueMoon: "#0055FF",
 });
 
 // A colour's channels as the display's levels (0..3), for blending by hand.
@@ -51,7 +36,9 @@ export function blendToBlack(levels, coverage) {
 	return color;
 }
 
-// System fonts, as Piu names them (the firmware's exact sizes only).
+// System fonts, as Piu names them (the firmware's exact sizes only). The Gothic
+// family, which the SDK's UI uses; the others follow the same naming
+// ("black 30px Bitham", "bold 42px Bitham", "condensed 21px Roboto", "bold 28px DroidSerif").
 export const FONT_KEY = Object.freeze({
 	GOTHIC_14: "14px Gothic",
 	GOTHIC_14_BOLD: "bold 14px Gothic",
@@ -61,11 +48,6 @@ export const FONT_KEY = Object.freeze({
 	GOTHIC_24_BOLD: "bold 24px Gothic",
 	GOTHIC_28: "28px Gothic",
 	GOTHIC_28_BOLD: "bold 28px Gothic",
-	BITHAM_30_BLACK: "black 30px Bitham",
-	BITHAM_42_BOLD: "bold 42px Bitham",
-	BITHAM_42_LIGHT: "light 42px Bitham",
-	ROBOTO_CONDENSED_21: "condensed 21px Roboto",
-	DROID_SERIF_28_BOLD: "bold 28px DroidSerif",
 });
 
 // On these displays the firmware substitutes larger fonts for two SDK defaults (measured).

@@ -15,7 +15,7 @@
 import { PBL_IF_COLOR_ELSE, GColor, FONT_KEY, TEXT_TOP_INSET } from "pebble-ui/sdk";
 import Timer from "timer";
 
-export const MAX_SELECTION_LAYER_CELLS = 3;
+const MAX_SELECTION_LAYER_CELLS = 3;
 
 const DEFAULT_CELL_PADDING = 10;
 const DEFAULT_SELECTED_INDEX = 0;
@@ -53,7 +53,6 @@ class SelectionLayerBehavior extends Behavior {
 		this.cellWidths = $.cellWidths.slice(0, this.numCells);
 		this.cellPadding = $.cellPadding ?? DEFAULT_CELL_PADDING;
 		this.selectedCellIdx = DEFAULT_SELECTED_INDEX;
-		this.isActive = true;
 		this.font = $.font ?? DEFAULT_FONT;
 		this.activeBackgroundColor = $.activeBackgroundColor ?? DEFAULT_ACTIVE_COLOR;
 		this.inactiveBackgroundColor = $.inactiveBackgroundColor ?? DEFAULT_INACTIVE_COLOR;
@@ -75,22 +74,14 @@ class SelectionLayerBehavior extends Behavior {
 		this.clearTimer();
 		port.stop();
 	}
-	setActive(port, isActive) {
-		if (isActive && !this.isActive)
-			this.selectedCellIdx = 0;
-		this.isActive = isActive;
-		port.invalidate();
-	}
 
 	// Drawing
 
 	onDraw(port) { // (x, y, width, height) would be the area to redraw; the layer's size is the port's
 		const h = port.height - 2 * MARGIN;
 		this.drawCellBackgrounds(port, h);
-		if (this.slideAnimProgress)
-			this.drawSliderSlide(port, h);
-		if (this.slideSettleAnimProgress)
-			this.drawSliderSettle(port, h);
+		if (this.slideAnimProgress || this.slideSettleAnimProgress)
+			this.drawSlider(port, h);
 		this.drawText(port, h);
 	}
 	drawCellBackgrounds(port, h) {
@@ -111,38 +102,27 @@ class SelectionLayerBehavior extends Behavior {
 			currentXOffset += width + this.cellPadding;
 		}
 	}
-	startingXOffset() {
+	// The selection box on its way to the next cell (slide: it moves and grows
+	// by the padding), then the overshoot shrinking back (settle).
+	drawSlider(port, h) {
+		const forward = this.slideIsForward ? 1 : -1;
 		let x = 0;
-		for (let i = 0; i < this.numCells; i++) {
-			if (this.selectedCellIdx === i)
-				break;
+		for (let i = 0; i < this.selectedCellIdx; i++)
 			x += this.cellWidths[i] + this.cellPadding;
+		let width;
+		if (this.slideAnimProgress) {
+			const current = this.cellWidths[this.selectedCellIdx];
+			const next = this.cellWidths[this.selectedCellIdx + forward];
+			const moved = Math.trunc(((next + this.cellPadding) * this.slideAnimProgress) / 100);
+			const grown = Math.trunc(((next - current + this.cellPadding) * this.slideAnimProgress) / 100);
+			width = current + grown;
+			x += forward * moved - (forward < 0 ? grown : 0);
 		}
-		return x;
-	}
-	drawSliderSlide(port, h) {
-		const nextCellWidth = this.cellWidths[this.selectedCellIdx + (this.slideIsForward ? 1 : -1)];
-		const slideDistance = nextCellWidth + this.cellPadding;
-		let currentSlideDistance = Math.trunc((slideDistance * this.slideAnimProgress) / 100);
-		if (!this.slideIsForward)
-			currentSlideDistance = -currentSlideDistance;
-		let currentXOffset = this.startingXOffset() + currentSlideDistance;
-		const curCellWidth = this.cellWidths[this.selectedCellIdx];
-		const totalCellWidthChange = nextCellWidth - curCellWidth + this.cellPadding;
-		const currentCellWidthChange = Math.trunc((totalCellWidthChange * this.slideAnimProgress) / 100);
-		const currentCellWidth = curCellWidth + currentCellWidthChange;
-		if (!this.slideIsForward)
-			currentXOffset -= currentCellWidthChange;
-		port.fillColor(this.activeBackgroundColor, MARGIN + currentXOffset, MARGIN, currentCellWidth, h);
-	}
-	drawSliderSettle(port, h) {
-		let xOffset = this.startingXOffset();
-		if (this.slideIsForward)
-			xOffset += this.cellWidths[this.selectedCellIdx];
-		const currentWidth = Math.trunc((this.cellPadding * this.slideSettleAnimProgress) / 100);
-		if (!this.slideIsForward)
-			xOffset -= currentWidth;
-		port.fillColor(this.activeBackgroundColor, MARGIN + xOffset, MARGIN, currentWidth, h);
+		else {
+			width = Math.trunc((this.cellPadding * this.slideSettleAnimProgress) / 100);
+			x += forward > 0 ? this.cellWidths[this.selectedCellIdx] : -width;
+		}
+		port.fillColor(this.activeBackgroundColor, MARGIN + x, MARGIN, width, h);
 	}
 	drawText(port, h) {
 		for (let i = 0, currentXOffset = 0; i < this.numCells; i++) {
@@ -228,8 +208,6 @@ class SelectionLayerBehavior extends Behavior {
 	// Buttons
 
 	pressUpDown(port, upwards) {
-		if (!this.isActive)
-			return true;
 		if (this.phase) {
 			this.change(upwards);
 			port.invalidate();
@@ -266,8 +244,6 @@ class SelectionLayerBehavior extends Behavior {
 		return true;
 	}
 	onPressSelect(port) {
-		if (!this.isActive)
-			return true;
 		this.cancelSlide(port);
 		if (this.selectedCellIdx >= this.numCells - 1) {
 			this.selectedCellIdx = 0;
@@ -280,8 +256,6 @@ class SelectionLayerBehavior extends Behavior {
 		return true;
 	}
 	onPressBack(port) {
-		if (!this.isActive)
-			return true;
 		this.cancelSlide(port);
 		if (this.selectedCellIdx === 0)
 			return false; // the window pops

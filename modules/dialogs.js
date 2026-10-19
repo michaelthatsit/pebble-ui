@@ -13,14 +13,15 @@ import View from "pebble-ui/View";
 
 // Message dialog: a coloured sheet with an icon and a message that slide up
 // from the bottom 700 ms after the window appears (250 ms, ease in-out).
-// data: icon, text, background (Yellow / White), color (Black), margin (10)
+// data: icon, text, background (Yellow / White), color (Black)
 
 const APPEAR_DELAY_MS = 700;
 const APPEAR_DURATION_MS = 250;
+const MARGIN = 10;
 
 class MessageDialogBehavior extends View.Behavior {
 	onDisplaying(container) {
-		const view = this.view, margin = view.margin, y = container.y;
+		const view = this.view, margin = MARGIN, y = container.y;
 		const background = container.first, icon = background.next, label = icon.next;
 		const timeline = this.timeline = new Timeline();
 		timeline.to(background, { y }, APPEAR_DURATION_MS, Math.quadEaseInOut, APPEAR_DELAY_MS);
@@ -44,9 +45,9 @@ const MessageDialogContainer = Container.template($ => ({
 	skin: new Skin({ fill: GColor.Black }), Behavior: $.constructor.Behavior,
 	contents: [
 		Content($, { left: 0, right: 0, top: screen.height, height: screen.height, skin: new Skin({ fill: $.background }) }),
-		Content($, { left: PBL_IF_ROUND_ELSE((screen.width - $.iconSkin.width) >> 1, $.margin), top: screen.height + $.margin, skin: $.iconSkin }),
+		Content($, { left: PBL_IF_ROUND_ELSE((screen.width - $.iconSkin.width) >> 1, MARGIN), top: screen.height + MARGIN, skin: $.iconSkin }),
 		Text($, {
-			left: $.margin, width: screen.width - 2 * $.margin, top: screen.height + $.margin + $.iconSkin.height, height: screen.height,
+			left: MARGIN, width: screen.width - 2 * MARGIN, top: screen.height + MARGIN + $.iconSkin.height, height: screen.height,
 			style: textLayerStyle(FONT_KEY.GOTHIC_24_BOLD, $.color, PBL_IF_ROUND_ELSE("center", "left")), string: $.text,
 		}),
 	],
@@ -60,7 +61,6 @@ export class MessageDialog extends View {
 		this.text = data.text;
 		this.background = data.background ?? PBL_IF_COLOR_ELSE(GColor.Yellow, GColor.White);
 		this.color = data.color ?? GColor.Black;
-		this.margin = data.margin ?? 10;
 	}
 	get Template() { return MessageDialogContainer }
 }
