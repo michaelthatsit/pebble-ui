@@ -1,0 +1,19 @@
+{
+  "name": "fitsky-patterns",
+  "author": "Michael Gutensohn",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Fitsky Patterns",
+    "uuid": "9b2d4f61-3c7e-4a58-9f0d-6e1b2a3c4d5e",
+    "projectType": "moddable",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": ["emery", "gabbro"],
+    "watchapp": { "watchface": false },
+    "messageKeys": ["dummy"],
+    "resources": { "media": [] }
+  }
+}

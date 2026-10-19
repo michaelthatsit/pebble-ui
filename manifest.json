@@ -10,6 +10,12 @@
 		"pebble-ui/ProgressLayer": "./modules/ProgressLayer",
 		"pebble-ui/SelectionLayer": "./modules/SelectionLayer",
 		"pebble-ui/dialogs": "./modules/dialogs",
-		"pebble-ui/PinWindow": "./modules/PinWindow"
+		"pebble-ui/PinWindow": "./modules/PinWindow",
+		"pebble-ui/ActionMenu": "./modules/ActionMenu",
+		"pebble-ui/StatsScreen": "./modules/StatsScreen",
+		"pebble-ui/cards": "./modules/cards",
+		"pebble-ui/AdjustWindow": "./modules/AdjustWindow",
+		"pebble-ui/InfoScreen": "./modules/InfoScreen",
+		"pebble-ui/BarList": "./modules/BarList"
 	}
 }

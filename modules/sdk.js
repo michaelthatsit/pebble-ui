@@ -26,11 +26,12 @@ export function colorLevels(color) {
 	return [1, 3, 5].map(i => Math.round(parseInt(color.substr(i, 2), 16) / 85));
 }
 
-// A colour from levels, blended towards black by `coverage` (0..1) in those levels.
-export function blendToBlack(levels, coverage) {
+// A colour from levels, blended by `coverage` (0..1) towards another's levels
+// (black by default), in the display's levels.
+export function blendToBlack(levels, coverage, towards = [0, 0, 0]) {
 	let color = "#";
-	for (const level of levels) {
-		const value = Math.round(level * (1 - coverage)) * 85;
+	for (let i = 0; i < 3; i++) {
+		const value = Math.round(levels[i] + (towards[i] - levels[i]) * coverage) * 85;
 		color += (value < 16 ? "0" : "") + value.toString(16);
 	}
 	return color;
@@ -48,6 +49,9 @@ export const FONT_KEY = Object.freeze({
 	GOTHIC_24_BOLD: "bold 24px Gothic",
 	GOTHIC_28: "28px Gothic",
 	GOTHIC_28_BOLD: "bold 28px Gothic",
+	LECO_20_BOLD_NUMBERS: "bold 20px Leco",
+	LECO_26_BOLD_NUMBERS_AM_PM: "bold 26px Leco",
+	LECO_42_NUMBERS: "42px Leco",
 });
 
 // On these displays the firmware substitutes larger fonts for two SDK defaults (measured).
@@ -56,17 +60,21 @@ export const STATUS_BAR_FONT = FONT_KEY.GOTHIC_18;
 
 // Piu draws a Pebble font (cap offset - 1) px above where graphics_draw_text
 // puts it for the same y (piuView.c, PiuViewDrawString). These top margins put
-// the glyphs back where a TextLayer has them. Measured for the Gothic family;
+// the glyphs back where a TextLayer has them. Measured against the C SDK for
+// Gothic 14, 14 Bold, 18, 18 Bold, 24 Bold, 28 Bold and the three LECO fonts;
 // the regular 24 and 28 are assumed to match their bold weights.
 export const TEXT_TOP_INSET = Object.freeze({
-	[FONT_KEY.GOTHIC_14]: 4,
-	[FONT_KEY.GOTHIC_14_BOLD]: 4,
+	[FONT_KEY.GOTHIC_14]: 2,
+	[FONT_KEY.GOTHIC_14_BOLD]: 2,
 	[FONT_KEY.GOTHIC_18]: 2,
 	[FONT_KEY.GOTHIC_18_BOLD]: 2,
 	[FONT_KEY.GOTHIC_24]: 4,
 	[FONT_KEY.GOTHIC_24_BOLD]: 4,
 	[FONT_KEY.GOTHIC_28]: 5,
 	[FONT_KEY.GOTHIC_28_BOLD]: 5,
+	[FONT_KEY.LECO_20_BOLD_NUMBERS]: 3,
+	[FONT_KEY.LECO_26_BOLD_NUMBERS_AM_PM]: 4,
+	[FONT_KEY.LECO_42_NUMBERS]: 8,
 });
 
 // A TextLayer's text: the text box starts at the content's top edge, as
@@ -86,4 +94,15 @@ export function bitmapSkin(id) {
 
 export function solidSkin(color) {
 	return new Skin({ fill: color });
+}
+
+// The time as the status bar shows it: 24 h with a leading zero, 12 h without.
+export function clockString(date = new Date()) {
+	let hours = date.getHours();
+	const minutes = date.getMinutes();
+	if (watch.hour12)
+		hours = (hours % 12) || 12;
+	else if (hours < 10)
+		hours = "0" + hours;
+	return hours + ":" + (minutes < 10 ? "0" : "") + minutes;
 }

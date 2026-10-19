@@ -9,10 +9,11 @@ transition. Emery (Pebble Time 2) and gabbro (Pebble Round 2).
 Everything that makes it look native was measured against the C SDK on the
 emulators, pixel by pixel, rather than guessed: cell heights and scrolling,
 fonts and their vertical offsets, where the action bar puts its icons, how the
-firmware anti-aliases a circle. The reference app is
+firmware anti-aliases a circle. The reference apps are
 [ui-patterns-alloy](https://github.com/michaelthatsit/ui-patterns-alloy), a
-recreation of pebble-examples/ui-patterns on this library, kept identical to
-the C original.
+recreation of pebble-examples/ui-patterns on this library, and
+[examples/fitsky-patterns](examples/fitsky-patterns), the screens of the
+fitsky workout app; both are kept identical to their C originals.
 
 ## Using it
 
@@ -44,8 +45,13 @@ yourself instead of including the manifest:
 ```
 
 `sdk`, `View` and `WindowStack` are needed by all the widgets; the rest are
-independent of each other (`lists` needs `Menu`, `dialogs` needs `ActionBar`,
-`PinWindow` needs `SelectionLayer` and `StatusBar`).
+independent of each other (`lists` and `cards` need `Menu`, `dialogs` needs
+`ActionBar`, `PinWindow` needs `SelectionLayer` and `StatusBar`,
+`AdjustWindow` needs `SelectionLayer`, `BarList` needs `ProgressLayer`).
+
+Every module an app imports stays resident, so open windows by module name
+(`push("pebble-ui/ActionMenu", data)`) rather than importing them all up
+front; the example apps do.
 
 A minimal app:
 
@@ -92,6 +98,19 @@ the machine's heaps (on the watch the code is read from flash instead).
 | `pebble-ui/SelectionLayer` | the SDK's selection layer: cells, bump and slide animations, `callbacks` | `SelectionLayer({...}, frame)` |
 | `pebble-ui/dialogs` | `MessageDialog` (sheet slides up), `ChoiceDialog` (icon, question, action bar, `onUp/onSelect/onDown`), `ConfigDialog` (title, icon, body) | `push(ChoiceDialog, {...})` |
 | `pebble-ui/PinWindow` | digits in a SelectionLayer under a title, with the status bar; `onComplete(digits)` | `push(PinWindow, {...})` |
+| `pebble-ui/ActionMenu` | the firmware's action menu: a coloured rail (ring on round), dimmed actions, the selected one lit; closes, then runs `onSelect(index, item)` | `push(ActionMenu, { items, background, onSelect })` |
+| `pebble-ui/StatsScreen` | a LECO clock with a line under it, an optional title, four corner numbers, on a colour; `delegate("update", {...})` | `push(StatsScreen, { center, sub, corners, title, background })` |
+| `pebble-ui/cards` | `CardMenu`: full-screen colour cards with a name and a category, paged by Up and Down | `new CardMenu({ items: [{ title, subtitle, color }], onSelect })` |
+| `pebble-ui/AdjustWindow` | rows of number fields in SelectionLayers with labels; Select moves down a row, Back up, `onComplete()` | `push(AdjustWindow, { title, rows, onComplete })` |
+| `pebble-ui/InfoScreen` | lines of centred text on a colour, a status line at the bottom; `setLine`, `setStatus` | `push(InfoScreen, { lines, status, background })` |
+| `pebble-ui/BarList` | a titled list of label, bar and value rows | `push(BarList, { title, rows: [{ label, value, text, color }] })` |
+| `pebble-ui/colors` | the 64 colours of the palette by their SDK names (opt-in: not in `manifest.json`, map it yourself) | `import { GColor } from "pebble-ui/colors"` |
+
+Menu also draws two-line cells (`items: [{ title, subtitle }]`, 61 px, as
+`menu_cell_basic_draw` does on these displays) and full-height cards
+(`fixed: true`). A View behavior that sets `this.longPress = { select: 700 }`
+gets `onClickSelect` and `onLongClickSelect` (Up and Down likewise) in place
+of the raw press, as `window_long_click_subscribe` gives.
 
 Each module's header comment documents its data and defaults.
 
@@ -111,7 +130,17 @@ Each module's header comment documents its data and defaults.
 
 ## Measured, not assumed
 
-The numbers in `sdk.js`, `Menu.js`, `StatusBar.js` and `ActionBar.js` come
-from screenshots of the C SDK on the emery and gabbro emulators, compared pixel
-by pixel with this library's output. Anything added should go through the same
-comparison; the reference app has the tooling.
+The numbers in `sdk.js`, `Menu.js`, `StatusBar.js`, `ActionBar.js`,
+`ActionMenu.js` and the fitsky components come from screenshots of the C SDK
+and of fitsky's C app on the emery and gabbro emulators, compared pixel by
+pixel with this library's output. Anything added should go through the same
+comparison; the example apps have the tooling.
+
+## Examples
+
+- [examples/fitsky-patterns](examples/fitsky-patterns): the fitsky screens
+  (cards, action menus, dashboards, the adjust window, bar list, info
+  screens, a menu with subtitles), each verified against the C app.
+- [ui-patterns-alloy](https://github.com/michaelthatsit/ui-patterns-alloy):
+  pebble-examples/ui-patterns, in its own repository with this library as a
+  submodule.

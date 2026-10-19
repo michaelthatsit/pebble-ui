@@ -6,7 +6,8 @@
 //
 //   SelectionLayer({ numCells: 3, cellWidths: [40, 40, 40], cellPadding: 4,
 //                    activeBackgroundColor: GColor.Red, inactiveBackgroundColor: GColor.DarkGray,
-//                    font: FONT_KEY.GOTHIC_28_BOLD,
+//                    font: FONT_KEY.GOTHIC_28_BOLD, textColor: GColor.White, activeTextColor: GColor.White,
+//                    active: true,
 //                    callbacks: { getCellText(i), increment(i), decrement(i), complete() } },
 //                  { left, top, width: 128, height: 34 })
 //
@@ -22,7 +23,6 @@ const DEFAULT_SELECTED_INDEX = 0;
 const DEFAULT_FONT = FONT_KEY.GOTHIC_28_BOLD;
 const DEFAULT_ACTIVE_COLOR = GColor.White;
 const DEFAULT_INACTIVE_COLOR = PBL_IF_COLOR_ELSE(GColor.DarkGray, GColor.Black);
-const TEXT_COLOR = GColor.White; // a GContext's default text colour
 
 const BUTTON_HOLD_REPEAT_MS = 100;
 const SETTLE_HEIGHT_DIFF = 6;
@@ -57,6 +57,9 @@ class SelectionLayerBehavior extends Behavior {
 		this.activeBackgroundColor = $.activeBackgroundColor ?? DEFAULT_ACTIVE_COLOR;
 		this.inactiveBackgroundColor = $.inactiveBackgroundColor ?? DEFAULT_INACTIVE_COLOR;
 		this.callbacks = $.callbacks;
+		this.textColor = $.textColor ?? GColor.White; // a GContext's default text colour
+		this.activeTextColor = $.activeTextColor ?? this.textColor;
+		this.isActive = $.active ?? true;
 		this.style = new Style({ font: this.font });
 		this.textTopInset = TEXT_TOP_INSET[this.font] ?? 0;
 		this.phase = null;
@@ -73,6 +76,16 @@ class SelectionLayerBehavior extends Behavior {
 	onUndisplaying(port) {
 		this.clearTimer();
 		port.stop();
+	}
+	// selection_layer_set_active: an inactive layer shows no active cell and ignores the buttons.
+	setActive(port, isActive) {
+		if (isActive && !this.isActive)
+			this.selectedCellIdx = 0;
+		this.isActive = isActive;
+		port.invalidate();
+	}
+	active(i) {
+		return this.isActive && this.selectedCellIdx === i;
 	}
 
 	// Drawing
@@ -96,7 +109,7 @@ class SelectionLayerBehavior extends Behavior {
 			if (this.selectedCellIdx === i)
 				height += pixelsForBumpSettle(this.bumpSettleAnimProgress);
 			let color = this.inactiveBackgroundColor;
-			if (this.selectedCellIdx === i && !this.slideAnimProgress)
+			if (this.active(i) && !this.slideAnimProgress)
 				color = this.activeBackgroundColor;
 			port.fillColor(color, MARGIN + currentXOffset, MARGIN + yOffset, width, height);
 			currentXOffset += width + this.cellPadding;
@@ -142,7 +155,8 @@ class SelectionLayerBehavior extends Behavior {
 				}
 				// Port.drawString draws from (x, y) whatever the style says: centre and inset by hand.
 				const textX = currentXOffset + Math.trunc((this.cellWidths[i] - this.style.measure(text).width) / 2);
-				port.drawString(text, this.style, TEXT_COLOR, MARGIN + textX, MARGIN + yOffset + this.textTopInset, this.cellWidths[i], height);
+				const color = this.active(i) && !this.slideAnimProgress ? this.activeTextColor : this.textColor;
+				port.drawString(text, this.style, color, MARGIN + textX, MARGIN + yOffset + this.textTopInset, this.cellWidths[i], height);
 			}
 			currentXOffset += this.cellWidths[i] + this.cellPadding;
 		}
@@ -208,6 +222,8 @@ class SelectionLayerBehavior extends Behavior {
 	// Buttons
 
 	pressUpDown(port, upwards) {
+		if (!this.isActive)
+			return true;
 		if (this.phase) {
 			this.change(upwards);
 			port.invalidate();
@@ -244,6 +260,8 @@ class SelectionLayerBehavior extends Behavior {
 		return true;
 	}
 	onPressSelect(port) {
+		if (!this.isActive)
+			return true;
 		this.cancelSlide(port);
 		if (this.selectedCellIdx >= this.numCells - 1) {
 			this.selectedCellIdx = 0;
@@ -256,6 +274,8 @@ class SelectionLayerBehavior extends Behavior {
 		return true;
 	}
 	onPressBack(port) {
+		if (!this.isActive)
+			return false;
 		this.cancelSlide(port);
 		if (this.selectedCellIdx === 0)
 			return false; // the window pops

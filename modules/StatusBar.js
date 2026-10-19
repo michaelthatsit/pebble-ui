@@ -6,19 +6,11 @@
 // dotted: StatusBarLayerSeparatorModeDotted, every other pixel of the row two
 // above the bar's bottom edge (measured at y 18). The clock updates on the
 // onMinuteChanged that pebble-ui/WindowStack distributes.
-import { STATUS_BAR_LAYER_HEIGHT as HEIGHT, STATUS_BAR_FONT, textLayerStyle } from "pebble-ui/sdk";
+import { STATUS_BAR_LAYER_HEIGHT as HEIGHT, STATUS_BAR_FONT, textLayerStyle, clockString } from "pebble-ui/sdk";
 
 const TEXT_TOP = -2; // measured: the digits start at y 5
 
-export function clockString(date = new Date()) {
-	let hours = date.getHours();
-	const minutes = date.getMinutes();
-	if (watch.hour12)
-		hours = (hours % 12) || 12;
-	else if (hours < 10)
-		hours = "0" + hours;
-	return hours + ":" + (minutes < 10 ? "0" : "") + minutes;
-}
+export { clockString };
 
 class StatusBarBehavior extends Behavior {
 	onMinuteChanged(bar) {

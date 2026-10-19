@@ -3,8 +3,10 @@
 // menu) or, without one, bubbles onSelect(index, item) to the behaviors above.
 //
 //   new Menu({ items: [{ title: "Checkbox List" }, ...], onSelect(index, item) {...} })
-//   data: items, cellHeight (44), normal [background, foreground], highlight
-//   [background, foreground], selection (0), Item (the row template, see below)
+//   data: items (title, and subtitle for a two-line 61 px cell), cellHeight (44),
+//   fixed (keep cellHeight on round too, for full-screen cards), normal
+//   [background, foreground], highlight [background, foreground], selection
+//   (0), Item (the row template, see below)
 //
 // A Menu is a View (a full-screen window) and also embeds in another window:
 //   new menu.Template(menu, { left: 0, right: 0, top: 0, height: 150 })
@@ -34,6 +36,14 @@ import View from "pebble-ui/View";
 
 const BOTTOM_PADDING = 20;
 const TITLE_BOX = 34;
+// A cell with a subtitle (measured against menu_cell_basic_draw on these
+// displays): 61 px, the title's box 1 px down and the subtitle's (Gothic 24,
+// not the SDK's 18: the firmware scales it) 25; on round the unfocused cells
+// stay 61 px and show the title alone, its box centred (13 px down).
+const SUBTITLE_CELL = 61;
+const SUBTITLE_TITLE_TOP = 1;
+const SUBTITLE_TOP = 25;
+const SUBTITLE_UNFOCUSED_TITLE_TOP = 13;
 const TITLE_INSET = 10;
 const ANIMATION_MS = 100;
 const REPEAT_DELAY_MS = 400;
@@ -51,7 +61,7 @@ class MenuBehavior extends View.Behavior {
 	}
 	rowHeight(index) {
 		const view = this.view;
-		if (ROUND)
+		if (ROUND && !view.fixed && !view.subtitles)
 			return index === view.selection ? FOCUSED : UNFOCUSED;
 		return view.cellHeight;
 	}
@@ -75,8 +85,9 @@ class MenuBehavior extends View.Behavior {
 			row.delegate("onReload", highlighted, height);
 		}
 		const viewHeight = menu.height || menu.coordinates.height;
-		const scroll = ROUND
-			? selectionTop - ((viewHeight - selectionHeight) >> 1)
+		// round: the selected cell centred, each half rounded down as the firmware does
+		const scroll = ROUND && !view.fixed
+			? selectionTop - ((viewHeight >> 1) - (selectionHeight >> 1))
 			: Math.max(0, Math.min(selectionTop + (selectionHeight >> 1) - (viewHeight >> 1), y + BOTTOM_PADDING - viewHeight));
 		this.to = { column: -scroll, bar: selectionTop - scroll, height: selectionHeight };
 		if (animate) {
@@ -161,10 +172,28 @@ export const MenuTitle = Label.template($ => ({
 	left: 0, right: 0, top: 0, bottom: 0, style: $.menu.titleStyle, string: $.item.title,
 }));
 
-export const MenuItem = Container.template($ => ({
-	left: 0, right: 0,
+// A basic cell with a subtitle: the title's box and the subtitle under it, as
+// menu_cell_basic_draw lays them out.
+class SubtitleBehavior extends Behavior {
+	onReload(row, highlighted) {
+		const cell = row.first;
+		const compact = ROUND && !highlighted;
+		cell.first.coordinates = { left: 0, right: 0, top: compact ? SUBTITLE_UNFOCUSED_TITLE_TOP : SUBTITLE_TITLE_TOP, height: TITLE_BOX };
+		cell.last.visible = !compact;
+	}
+}
+export const MenuTitleSubtitle = Container.template($ => ({
+	left: 0, right: 0, top: 0, bottom: 0,
 	contents: [
-		MenuTitle($),
+		Label($, { left: 0, right: 0, top: SUBTITLE_TITLE_TOP, height: TITLE_BOX, style: $.menu.titleTopStyle, string: $.item.title }),
+		Label($, { left: 0, right: 0, top: SUBTITLE_TOP, height: 24, style: $.menu.subtitleStyle, string: $.item.subtitle }),
+	],
+}));
+
+export const MenuItem = Container.template($ => ({
+	left: 0, right: 0, Behavior: $.item.subtitle ? SubtitleBehavior : undefined,
+	contents: [
+		$.item.subtitle ? MenuTitleSubtitle($) : MenuTitle($),
 	],
 }));
 
@@ -186,7 +215,9 @@ export default class MenuView extends View {
 		super(data);
 		this.items = data.items.map(item => typeof item === "string" ? { title: item } : item);
 		this.selection = data.selection ?? 0;
-		this.cellHeight = data.cellHeight ?? MENU_CELL_BASIC_CELL_HEIGHT;
+		this.subtitles = this.items.some(item => item.subtitle);
+		this.cellHeight = data.cellHeight ?? (this.subtitles ? SUBTITLE_CELL : MENU_CELL_BASIC_CELL_HEIGHT);
+		this.fixed = !!data.fixed;
 		this.Item = data.Item ?? MenuItem;
 		const normal = data.normal ?? [GColor.White, GColor.Black];
 		const highlight = data.highlight ?? [GColor.Black, GColor.White];
@@ -195,11 +226,15 @@ export default class MenuView extends View {
 			highlight: new Skin({ fill: highlight[0] }),
 		};
 		const inset = TEXT_TOP_INSET[FONT_KEY.GOTHIC_24_BOLD];
+		const horizontal = ROUND ? "center" : "left", left = ROUND ? 0 : TITLE_INSET;
 		this.titleStyle = new Style({
-			font: FONT_KEY.GOTHIC_24_BOLD, color: [normal[1], highlight[1]],
-			horizontal: ROUND ? "center" : "left", left: ROUND ? 0 : TITLE_INSET,
+			font: FONT_KEY.GOTHIC_24_BOLD, color: [normal[1], highlight[1]], horizontal, left,
 			vertical: "middle", top: inset, bottom: TITLE_BOX - titleFontHeight - inset,
 		});
+		if (this.subtitles) {
+			this.titleTopStyle = new Style({ font: FONT_KEY.GOTHIC_24_BOLD, color: [normal[1], highlight[1]], horizontal, left, vertical: "top", top: inset });
+			this.subtitleStyle = new Style({ font: FONT_KEY.GOTHIC_24, color: [normal[1], highlight[1]], horizontal, left, vertical: "top", top: TEXT_TOP_INSET[FONT_KEY.GOTHIC_24] });
+		}
 	}
 	get Template() { return MenuContainer }
 }

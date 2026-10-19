@@ -52,12 +52,14 @@ class WindowStack extends Behavior {
 	push(View, data) {
 		this.container.defer("display", this.make(View, data), false);
 	}
-	pop(count = 1) {
+	// then: called once the window below is back (an action menu's handler runs there).
+	pop(count = 1, then) {
 		if (!this.history.length)
 			return;
 		let view;
 		while (count-- && this.history.length)
 			view = this.history.pop();
+		this.then = then;
 		this.container.defer("display", view, true);
 	}
 	onScreenDisplayed(container) {
@@ -66,6 +68,10 @@ class WindowStack extends Behavior {
 	onTransitionEnded(container) {
 		container.purge();
 		this.onScreenDisplayed(container);
+		const then = this.then;
+		this.then = undefined;
+		if (then)
+			then();
 	}
 }
 WindowStack.current = null;

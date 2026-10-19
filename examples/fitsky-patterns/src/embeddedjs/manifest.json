@@ -1,0 +1,30 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/manifest_mod.json"
+	],
+	"config": {
+		"creation": {
+			"stack": 5120,
+			"slot": 45056,
+			"chunk": 21504
+		}
+	},
+	"modules": {
+		"pebble-ui/sdk": "../../../../modules/sdk",
+		"pebble-ui/View": "../../../../modules/View",
+		"pebble-ui/WindowStack": "../../../../modules/WindowStack",
+		"pebble-ui/Menu": "../../../../modules/Menu",
+		"pebble-ui/cards": "../../../../modules/cards",
+		"pebble-ui/ActionMenu": "../../../../modules/ActionMenu",
+		"pebble-ui/StatsScreen": "../../../../modules/StatsScreen",
+		"pebble-ui/SelectionLayer": "../../../../modules/SelectionLayer",
+		"pebble-ui/AdjustWindow": "../../../../modules/AdjustWindow",
+		"pebble-ui/InfoScreen": "../../../../modules/InfoScreen",
+		"pebble-ui/ProgressLayer": "../../../../modules/ProgressLayer",
+		"pebble-ui/BarList": "../../../../modules/BarList",
+		"*": [
+			"./main",
+			"./windows/*"
+		]
+	}
+}
