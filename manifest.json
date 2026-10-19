@@ -16,6 +16,8 @@
 		"pebble-ui/cards": "./modules/cards",
 		"pebble-ui/AdjustWindow": "./modules/AdjustWindow",
 		"pebble-ui/InfoScreen": "./modules/InfoScreen",
-		"pebble-ui/BarList": "./modules/BarList"
+		"pebble-ui/BarList": "./modules/BarList",
+		"pebble-ui/LongPress": "./modules/LongPress",
+		"pebble-ui/subtitles": "./modules/subtitles"
 	}
 }

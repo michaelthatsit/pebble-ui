@@ -16,7 +16,7 @@ components. Emery (Pebble Time 2) and gabbro (Pebble Round 2).
 | Heart rate zones | `BarList` | ![](screenshots/emery/hrzones.png) | ![](screenshots/gabbro/hrzones.png) |
 | Workout summary | `InfoScreen` | ![](screenshots/emery/summary.png) | ![](screenshots/gabbro/summary.png) |
 | Interval round | `InfoScreen` | ![](screenshots/emery/interval.png) | ![](screenshots/gabbro/interval.png) |
-| Plans | `Menu` with subtitles | ![](screenshots/emery/subtitles.png) | ![](screenshots/gabbro/subtitles.png) |
+| Plans | `SubtitleMenu` | ![](screenshots/emery/subtitles.png) | ![](screenshots/gabbro/subtitles.png) |
 
 ## Verified against the C app
 
@@ -51,5 +51,5 @@ chosen action after they close.
 `stack 5120, slot 45056, chunk 21504` (`src/c/mdbl.c`), Piu lists 1024. The
 windows are opened by module name so each library module loads when first
 used; opening them all leaves little slot heap, and the compiled JavaScript
-(42 kB) shares the emulator's app heap with the machine. See the library
+(41 kB) shares the emulator's app heap with the machine. See the library
 README.

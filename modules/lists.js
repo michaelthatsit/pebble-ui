@@ -14,24 +14,8 @@ import Menu, { MenuTitle, MenuItem } from "pebble-ui/Menu";
 // Checkbox: a 12 px box at x = width - 2 * BOX, vertically centred, with the
 // 16 px tick drawn from 3 px above the box. One Port, 16 x 18, holds both.
 const BOX = 12;
-const TICK = [ // tick_black.png from pebble-examples/ui-patterns, 16 x 16 (strings stay in the read-only archive)
-	"0000000000000000",
-	"0000000000000000",
-	"0000000000000100",
-	"0000000000001110",
-	"0000000000011111",
-	"0000000000111110",
-	"0110000001111100",
-	"1111000011111000",
-	"1111100111110000",
-	"0111111111100000",
-	"0011111111000000",
-	"0001111110000000",
-	"0000111100000000",
-	"0000011000000000",
-	"0000000000000000",
-	"0000000000000000",
-];
+// tick_black.png from pebble-examples/ui-patterns, 16 x 16, a row per hex word (bit 15 is the left pixel)
+const TICK = "0000 0000 0004 000E 001F 003E 607C F0F8 F9F0 7FE0 3FC0 1F80 0F00 0600 0000 0000".split(" ");
 // Radio: graphics_draw_circle(6) and graphics_fill_circle(3) as the firmware
 // anti-aliases them, as coverage levels (0: none, 3: full), sampled from the C app.
 const RADIUS = 6;
@@ -165,11 +149,11 @@ export class CheckboxList extends Menu {
 		if (!on)
 			return;
 		for (let y = 0; y < TICK.length; y++) {
-			const row = TICK[y];
-			for (let x = 0; x < row.length;) {
-				if (row[x] === "1") {
+			const bits = parseInt(TICK[y], 16);
+			for (let x = 0; x < 16;) {
+				if (bits & (0x8000 >> x)) {
 					let end = x;
-					while (row[end] === "1") end++;
+					while (end < 16 && (bits & (0x8000 >> end))) end++;
 					port.fillColor(color, x, y, end - x, 1);
 					x = end;
 				}

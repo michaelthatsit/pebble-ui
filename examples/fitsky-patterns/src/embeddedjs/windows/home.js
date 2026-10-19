@@ -50,7 +50,7 @@ const WINDOWS = [
 		{ text: "WORK", font: FONT_KEY.GOTHIC_24_BOLD, top: 80, height: 28 },
 		{ text: "0:27 / 0:30", font: FONT_KEY.GOTHIC_28_BOLD, top: 112, height: 36 },
 	] } },
-	{ title: "Plans", View: Menu, data: { items: [
+	{ title: "Plans", View: "pebble-ui/subtitles", data: { items: [
 		{ title: "Freeform", subtitle: "No plan — log sets freely" }, { title: "Push Day", subtitle: "5 exercises" }, { title: "Legs", subtitle: "4 exercises" }, { title: "Core", subtitle: "3 exercises" },
 	], onSelect(i, item) { console.log(item.title); } } },
 ];

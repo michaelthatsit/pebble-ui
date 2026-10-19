@@ -3,7 +3,7 @@
 //
 //   ProgressLayer({ width: 80, progress: 0, cornerRadius: 2, foregroundColor: GColor.White,
 //                   backgroundColor: GColor.Black }, { left, top, width: 80, height: 6 })
-//   layer.delegate("setProgress", 50); layer.delegate("incrementProgress", 1);
+//   layer.delegate("setProgress", 50);
 import { GColor } from "pebble-ui/sdk";
 
 class ProgressLayerBehavior extends Behavior {
@@ -19,9 +19,6 @@ class ProgressLayerBehavior extends Behavior {
 		const width = Math.floor((this.progress * this.width) / 100);
 		layer.last.coordinates = { left: 0, top: 0, bottom: 0, width };
 		layer.last.visible = width > 0; // a zero-width RoundRect still paints two pixels
-	}
-	incrementProgress(layer, progress) {
-		this.setProgress(layer, this.progress + progress);
 	}
 }
 

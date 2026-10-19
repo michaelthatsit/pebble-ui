@@ -25,6 +25,7 @@
 		"*": [
 			"./main",
 			"./windows/*"
-		]
+		],
+		"pebble-ui/subtitles": "../../../../modules/subtitles"
 	}
 }

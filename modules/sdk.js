@@ -9,9 +9,6 @@ export const PBL_IF_ROUND_ELSE = (round, rect) => ROUND ? round : rect;
 
 export const ACTION_BAR_WIDTH = PBL_IF_ROUND_ELSE(40, 34);
 export const STATUS_BAR_LAYER_HEIGHT = 20;
-export const MENU_CELL_BASIC_CELL_HEIGHT = 44;
-export const MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT = 68;
-export const MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT = 32;
 
 // The colours the SDK's own UI uses, by their SDK names (pebble-ui/colors has
 // all 64 of the palette; it costs 2 kB of compiled code, so it is opt-in).
@@ -38,8 +35,9 @@ export function blendToBlack(levels, coverage, towards = [0, 0, 0]) {
 }
 
 // System fonts, as Piu names them (the firmware's exact sizes only). The Gothic
-// family, which the SDK's UI uses; the others follow the same naming
-// ("black 30px Bitham", "bold 42px Bitham", "condensed 21px Roboto", "bold 28px DroidSerif").
+// family, which the SDK's UI uses; the others follow the same naming ("bold
+// 26px Leco", "42px Leco", "black 30px Bitham", "bold 42px Bitham", "condensed
+// 21px Roboto", "bold 28px DroidSerif"); pebble-ui/StatsScreen has the LECO ones.
 export const FONT_KEY = Object.freeze({
 	GOTHIC_14: "14px Gothic",
 	GOTHIC_14_BOLD: "bold 14px Gothic",
@@ -49,20 +47,16 @@ export const FONT_KEY = Object.freeze({
 	GOTHIC_24_BOLD: "bold 24px Gothic",
 	GOTHIC_28: "28px Gothic",
 	GOTHIC_28_BOLD: "bold 28px Gothic",
-	LECO_20_BOLD_NUMBERS: "bold 20px Leco",
-	LECO_26_BOLD_NUMBERS_AM_PM: "bold 26px Leco",
-	LECO_42_NUMBERS: "42px Leco",
 });
 
-// On these displays the firmware substitutes larger fonts for two SDK defaults (measured).
-export const TEXT_LAYER_DEFAULT_FONT = FONT_KEY.GOTHIC_18_BOLD;
-export const STATUS_BAR_FONT = FONT_KEY.GOTHIC_18;
+// On these displays the firmware substitutes larger fonts for two SDK defaults
+// (measured): a TextLayer's default is Gothic 18 Bold, the status bar's Gothic 18.
 
 // Piu draws a Pebble font (cap offset - 1) px above where graphics_draw_text
 // puts it for the same y (piuView.c, PiuViewDrawString). These top margins put
 // the glyphs back where a TextLayer has them. Measured against the C SDK for
-// Gothic 14, 14 Bold, 18, 18 Bold, 24 Bold, 28 Bold and the three LECO fonts;
-// the regular 24 and 28 are assumed to match their bold weights.
+// Gothic 14, 14 Bold, 18, 18 Bold, 24 Bold, 28 Bold and three LECO fonts; the
+// regular 24 and 28 are assumed to match their bold weights.
 export const TEXT_TOP_INSET = Object.freeze({
 	[FONT_KEY.GOTHIC_14]: 2,
 	[FONT_KEY.GOTHIC_14_BOLD]: 2,
@@ -72,9 +66,9 @@ export const TEXT_TOP_INSET = Object.freeze({
 	[FONT_KEY.GOTHIC_24_BOLD]: 4,
 	[FONT_KEY.GOTHIC_28]: 5,
 	[FONT_KEY.GOTHIC_28_BOLD]: 5,
-	[FONT_KEY.LECO_20_BOLD_NUMBERS]: 3,
-	[FONT_KEY.LECO_26_BOLD_NUMBERS_AM_PM]: 4,
-	[FONT_KEY.LECO_42_NUMBERS]: 8,
+	"bold 20px Leco": 3,
+	"bold 26px Leco": 4,
+	"42px Leco": 8,
 });
 
 // A TextLayer's text: the text box starts at the content's top edge, as

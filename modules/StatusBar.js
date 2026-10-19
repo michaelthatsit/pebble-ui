@@ -6,7 +6,7 @@
 // dotted: StatusBarLayerSeparatorModeDotted, every other pixel of the row two
 // above the bar's bottom edge (measured at y 18). The clock updates on the
 // onMinuteChanged that pebble-ui/WindowStack distributes.
-import { STATUS_BAR_LAYER_HEIGHT as HEIGHT, STATUS_BAR_FONT, textLayerStyle, clockString } from "pebble-ui/sdk";
+import { STATUS_BAR_LAYER_HEIGHT as HEIGHT, FONT_KEY, textLayerStyle, clockString } from "pebble-ui/sdk";
 
 const TEXT_TOP = -2; // measured: the digits start at y 5
 
@@ -33,7 +33,7 @@ export const StatusBar = Container.template($ => ({
 	contents: [
 		Label($, {
 			left: 0, right: 0, top: TEXT_TOP, height: HEIGHT,
-			style: textLayerStyle(STATUS_BAR_FONT, $.color, "center"),
+			style: textLayerStyle(FONT_KEY.GOTHIC_18, $.color, "center"),
 			string: clockString(),
 		}),
 		$.dotted ? Port($, { left: 0, right: 0, top: HEIGHT - 2, height: 1, Behavior: DottedSeparatorBehavior }) : null,

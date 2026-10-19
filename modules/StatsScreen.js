@@ -14,6 +14,8 @@
 import { PBL_IF_COLOR_ELSE, GColor, FONT_KEY, textLayerStyle, clockString } from "pebble-ui/sdk";
 import View from "pebble-ui/View";
 
+export const LECO = Object.freeze({ BOLD_20: "bold 20px Leco", BOLD_26: "bold 26px Leco", REGULAR_42: "42px Leco" });
+
 const CORNER_MARGIN_X = 8;
 const CORNER_MARGIN_Y = 6;
 const CORNER_HEIGHT = 28;
@@ -43,14 +45,14 @@ const StatsScreenContainer = Container.template($ => {
 	const h = screen.height, w = screen.width, color = $.color, titled = $.title !== undefined;
 	const corner = (side, top) => Label($, {
 		left: CORNER_MARGIN_X, right: CORNER_MARGIN_X, top, height: CORNER_HEIGHT,
-		style: textLayerStyle(FONT_KEY.LECO_26_BOLD_NUMBERS_AM_PM, color, side),
+		style: textLayerStyle(LECO.BOLD_26, color, side),
 	});
 	return {
 		skin: new Skin({ fill: $.background }), Behavior: $.constructor.Behavior,
 		contents: [
 			Label($, { left: 8, right: 8, top: (h >> 1) - 52, height: 24, style: textLayerStyle(FONT_KEY.GOTHIC_18_BOLD, color, "center"), visible: titled }),
-			Label($, { left: 0, right: 0, top: (h >> 1) - (titled ? 30 : 32), height: 50, style: textLayerStyle(FONT_KEY.LECO_42_NUMBERS, color, "center") }),
-			Label($, { left: 0, right: 0, top: (h >> 1) + (titled ? 20 : 18), height: titled ? 24 : 28, style: textLayerStyle(titled ? FONT_KEY.LECO_20_BOLD_NUMBERS : FONT_KEY.LECO_26_BOLD_NUMBERS_AM_PM, color, "center") }),
+			Label($, { left: 0, right: 0, top: (h >> 1) - (titled ? 30 : 32), height: 50, style: textLayerStyle(LECO.REGULAR_42, color, "center") }),
+			Label($, { left: 0, right: 0, top: (h >> 1) + (titled ? 20 : 18), height: titled ? 24 : 28, style: textLayerStyle(titled ? LECO.BOLD_20 : LECO.BOLD_26, color, "center") }),
 			corner("left", CORNER_MARGIN_Y),
 			corner("right", CORNER_MARGIN_Y),
 			corner("left", h - CORNER_HEIGHT - CORNER_MARGIN_Y),

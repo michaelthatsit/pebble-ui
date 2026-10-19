@@ -47,7 +47,8 @@ once, include the library's manifest instead, which lists all the modules:
 `sdk`, `View` and `WindowStack` are needed by all the widgets; the rest are
 independent of each other (`lists` and `cards` need `Menu`, `dialogs` needs
 `ActionBar`, `PinWindow` needs `SelectionLayer` and `StatusBar`,
-`AdjustWindow` needs `SelectionLayer`, `BarList` needs `ProgressLayer`).
+`AdjustWindow` needs `SelectionLayer`, `BarList` needs `ProgressLayer`,
+`subtitles` and `cards` need `Menu`, `LongPress` needs `View`).
 
 Every module an app imports stays resident, so open windows by module name
 (`push("pebble-ui/ActionMenu", data)`) rather than importing them all up
@@ -87,7 +88,7 @@ the machine's heaps (on the watch the code is read from flash instead).
 
 | Module | What | Construct |
 | --- | --- | --- |
-| `pebble-ui/sdk` | `ACTION_BAR_WIDTH`, `STATUS_BAR_LAYER_HEIGHT`, menu cell heights, `GColor` (the colours the SDK's UI uses; `pebble-ui/colors`, opt-in, has all 64), `FONT_KEY`, `PBL_IF_COLOR_ELSE`, `PBL_IF_ROUND_ELSE`, `textLayerStyle()`, `bitmapSkin()`, `solidSkin()` | import what you need |
+| `pebble-ui/sdk` | `ACTION_BAR_WIDTH`, `STATUS_BAR_LAYER_HEIGHT`, `GColor` (the colours the SDK's UI uses; `pebble-ui/colors`, opt-in, has all 64), `FONT_KEY`, `clockString()`, `PBL_IF_COLOR_ELSE`, `PBL_IF_ROUND_ELSE`, `textLayerStyle()`, `bitmapSkin()`, `solidSkin()` | import what you need |
 | `pebble-ui/WindowStack` | the window stack, as the Application's behavior; `push(View, data)`, `pop(count)`, `depth`, `WindowStack.current` | `new WindowStack` |
 | `pebble-ui/View` | a window: `Template` builds it, `Behavior` gets the buttons (`onPressUp/Down/Select/Back`, `onRelease...`); Back pops | subclass |
 | `pebble-ui/Menu` | MenuLayer: `items`, `onSelect(index, item)`, `cellHeight`, `normal` and `highlight` colours, custom `Item` rows; a window, or embedded with `new menu.Template(menu, {...})` | `new Menu({...})` |
@@ -106,11 +107,10 @@ the machine's heaps (on the watch the code is read from flash instead).
 | `pebble-ui/BarList` | a titled list of label, bar and value rows | `push(BarList, { title, rows: [{ label, value, text, color }] })` |
 | `pebble-ui/colors` | the 64 colours of the palette by their SDK names (opt-in: not in `manifest.json`, map it yourself) | `import { GColor } from "pebble-ui/colors"` |
 
-Menu also draws two-line cells (`items: [{ title, subtitle }]`, 61 px, as
-`menu_cell_basic_draw` does on these displays) and full-height cards
-(`fixed: true`). A View behavior that sets `this.longPress = { select: 700 }`
-gets `onClickSelect` and `onLongClickSelect` (Up and Down likewise) in place
-of the raw press, as `window_long_click_subscribe` gives.
+| `pebble-ui/subtitles` | `SubtitleMenu`: two-line cells (`{ title, subtitle }`, 61 px, as `menu_cell_basic_draw` draws them on these displays) | `new SubtitleMenu({ items, onSelect })` |
+| `pebble-ui/LongPress` | `LongPressBehavior`: a View behavior that sets `this.longPress = { select: 700 }` gets `onClickSelect` and `onLongClickSelect` (Up and Down likewise) in place of the raw press, as `window_long_click_subscribe` gives | extend it |
+
+Menu also draws full-height cards (`fixed: true`).
 
 Each module's header comment documents its data and defaults.
 
