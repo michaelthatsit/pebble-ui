@@ -87,18 +87,65 @@ booleans; `Menu.onSelect(index, item)` gets your item object back; `PinWindow`
 calls `onComplete(digits)` with numbers once Select leaves the last cell, and
 Back on the first cell pops.
 
-## Memory, when the emulator aborts
+## Memory budget
+
+The emulator's app heap is a fixed 122.5 kB. It holds a copy of the compiled
+code (`build/mods/<platform>/mc.xsa`) and the machine: stack 5120, slot 45056,
+chunk 21504. With those sizes the code ceiling is about **43,000 B**. The
+budget is zero-sum: shrinking slot or chunk to fit more code only moves the
+abort, from `fxMapArchive failed` to `Slot allocation` or `Chunk allocation`.
+Keep the `mdbl.c` sizes and change the code instead.
+
+**The ceiling is the emulator's.** The watch maps the archive from flash and
+has about 40 kB more room, so an app over the ceiling can still run there
+(see the `pebble-phone-dev-connection` skill for installing on the watch).
+
+Measure after every build:
+
+```sh
+bash pebble-ui/tools/sizes.sh .     # bytecode per module, largest first, and the margin
+```
+
+What the library costs, in compiled bytes (emery):
+
+| Module | B | Module | B |
+| --- | --- | --- | --- |
+| `SelectionLayer` | 5408 | `sdk` | 2365 |
+| `ActionMenu` | 4817 | `PinWindow` | 2272 |
+| `Menu` | 4638 | `WindowStack` | 2014 |
+| `lists` | 4161 | `BarList` | 1960 |
+| `dialogs` | 4126 | `colors` | 1920 |
+| `AdjustWindow` | 3328 | `subtitles` | 1644 |
+| `StatsScreen` | 2376 | `ActionBar` | 1630 |
+
+`View`, `StatusBar`, `cards`, `LongPress` and `ProgressLayer` are about 1.1 kB
+each. Any menu app pays `sdk` + `View` + `WindowStack` + `Menu`, about 10 kB,
+which leaves about 33 kB for its own code and other widgets.
+
+**When a build is over the ceiling, stop and report.** Give the size, the
+largest modules from `sizes.sh`, and these options:
+
+1. Test on the watch, where it fits.
+2. Check screens one at a time in the emulator. Build with a manifest that
+   maps only the home window and the screen under test.
+3. Cut the app's own code. It is usually the largest part: per-screen glue,
+   long string tables, `new Style` tables (about 1 kB each).
+4. Split screens into a second app.
+
+Copying a library module into the app to trim it saves only what you delete
+from it. A shim that re-exports the module saves nothing. Opening windows by
+module name saves slot at run time, not archive bytes: every mapped module is
+compiled into `mc.xsa`.
 
 | Message | Cause | Fix |
 | --- | --- | --- |
 | `memory full` at launch | template machine sizes | the `mdbl.c` above |
-| `fxMapArchive failed` | compiled code too large for the app heap, about 42 kB with these sizes (`build/mods/emery/mc.xsa`) | map fewer modules; split screens into another app |
-| `Slot allocation: failed` | too much resident code or too many objects | open windows by module name; fewer, larger modules |
-| `Chunk allocation: ... failed` | too many Piu contents or Texts on screen | fewer contents per row, Label instead of Text |
+| `fxMapArchive failed` | code over the ceiling (`sizes.sh`) | the options above |
+| `Slot allocation: failed` | too much resident code or too many objects, or slot below 45056 | open windows by module name; fewer, larger modules |
+| `Chunk allocation: ... failed` | too many Piu contents or Texts on screen, or chunk below 21504 | fewer contents per row, Label instead of Text |
 | `stack overflow` | stack below 5120 | keep 5120 |
 
-Each imported module stays resident for the app's life. On the watch the
-code is in flash and 40 kB roomier than the emulator.
+Each imported module stays resident for the app's life.
 
 ## Verify on the emulator
 
@@ -110,6 +157,7 @@ bash pebble-ui/tools/tour.sh . emery shots steps.txt   # installs, runs the step
 python3 pebble-ui/tools/describe.py shots/home.png     # the screen in numbers: background, text bands
 python3 pebble-ui/tools/sheet.py all.png shots/*.png   # one labelled image of every frame
 python3 pebble-ui/tools/diff.py mine.png theirs.png    # pixels differing, and their rows
+bash pebble-ui/tools/sizes.sh .                        # compiled bytes per module, margin under the ceiling
 ```
 
 A steps file is one step per line: `shot home`, `click down`, `click select
@@ -128,9 +176,10 @@ Gothic 18 Bold shows as a band starting at row 51. When recreating a C
 screen, build the C app for the same emulator, tour it the same way and
 `diff.py` the frames; zero pixels differing is the bar the library meets.
 
-On the watch: in the phone app's watch settings turn on the LAN developer
-connection, note the IP it shows, then `pebble install --phone <ip>` and
-`pebble logs --phone <ip>`.
+On the watch: use the `pebble-phone-dev-connection` skill. It finds the
+phone over Tailscale and runs `pebble install --phone <ip>` and
+`pebble logs --phone <ip>`. Without it: in the phone app's watch settings,
+turn on the LAN developer connection and use the IP it shows.
 
 ## Common mistakes
 
