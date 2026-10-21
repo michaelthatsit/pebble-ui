@@ -11,6 +11,10 @@ measured pixel for pixel against the C SDK: `~/workspace/pebble-ui`
 lists every module's data and the module headers document their options;
 read those, this skill is the workflow around them.
 
+Every finished screen ends at a checkpoint: show Michael the screenshots
+and ask whether to install on his watch. See "At each checkpoint" under
+"Verify on the emulator".
+
 ## Scaffold
 
 ```sh
@@ -160,7 +164,31 @@ python3 pebble-ui/tools/diff.py mine.png theirs.png    # pixels differing, and t
 bash pebble-ui/tools/sizes.sh .                        # compiled bytes per module, margin under the ceiling
 ```
 
-In pi-web, show a screenshot you took with the `show_image` tool.
+### At each checkpoint
+
+A checkpoint is a screen or change that builds and tours cleanly in the
+emulator, or any moment Michael asks how it looks. At each one, do these
+three things in this order:
+
+1. Show every frame of the tour with `show_image`, one call per frame, each
+   with a one-line caption of what it shows ("Sessions, second row
+   selected"). The screenshot is the report. Don't describe pixels in text
+   instead. `read` shows an image only to you, and a file path in your
+   message shows him nothing; `show_image` is what puts it in front of him.
+2. Say in one or two lines what changed and what you checked, with the
+   `sizes.sh` margin.
+3. End your turn with this question, and wait for the answer before you
+   build anything else: "Want me to install it on your watch over the
+   developer connection?"
+
+If he says yes, use the `pebble-phone-dev-connection` skill to install it.
+Take a screenshot on the watch and show it with `show_image` too, then go
+on to the next screen. If he says no, go straight on.
+
+When a build is over the emulator ceiling, there is nothing to tour. The
+checkpoint is the report from the memory budget section, and the question
+becomes: "It doesn't fit the emulator. Want me to install it on your watch
+over the developer connection instead?"
 
 A steps file is one step per line: `shot home`, `click down`, `click select
 3` (the wait in seconds), `wait 2`. By hand instead: `pebble install
