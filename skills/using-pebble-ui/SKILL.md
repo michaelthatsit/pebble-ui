@@ -160,6 +160,8 @@ python3 pebble-ui/tools/diff.py mine.png theirs.png    # pixels differing, and t
 bash pebble-ui/tools/sizes.sh .                        # compiled bytes per module, margin under the ceiling
 ```
 
+In pi-web, show a screenshot you took with the `show_image` tool.
+
 A steps file is one step per line: `shot home`, `click down`, `click select
 3` (the wait in seconds), `wait 2`. By hand instead: `pebble install
 --emulator emery`, `pebble emu-button --emulator emery click <back|up|select|down>`,
