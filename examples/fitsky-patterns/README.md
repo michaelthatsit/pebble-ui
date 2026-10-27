@@ -51,5 +51,12 @@ chosen action after they close.
 `stack 5120, slot 45056, chunk 21504` (`src/c/mdbl.c`), Piu lists 1024. The
 windows are opened by module name so each library module loads when first
 used; opening them all leaves little slot heap, and the compiled JavaScript
-(41 kB) shares the emulator's app heap with the machine. See the library
+(43,161 B) shares the emulator's app heap with the machine. See the library
 README.
+
+The full example is now about 160 B over the emulator's ~43,000 B ceiling
+(`mc.xsa` 43,161 B after the StatusBar and ActionMenu theme options), so it
+aborts with `fxMapArchive failed` in the emulator. It runs on the watch, which
+has about 40 kB more room. To check screens in the emulator, build with a
+manifest that maps only the home window and the screen under test (see
+`skills/using-pebble-ui/SKILL.md`, "Memory budget").

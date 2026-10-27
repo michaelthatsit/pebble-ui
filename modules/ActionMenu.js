@@ -151,6 +151,7 @@ const ActionMenuContainer = Container.template($ => ({
 		ROUND
 			? Port($, { left: 0, right: 0, top: 0, bottom: 0, Behavior: RoundInsideBehavior })
 			: Port($, { left: 6, top: 10, width: 5, height: 5, Behavior: CrumbBehavior }),
+		// keep this condition in sync with place(), which starts at content(3) instead of content(2) when it holds
 		$.border && !ROUND ? Content($, { left: RAIL - 1, width: 1, top: 0, bottom: 0, skin: new Skin({ fill: $.border }) }) : null,
 		...$.items.map(item => Label($, { left: TEXT_LEFT, right: 0, top: 0, height: 30, style: $.style, string: item.title })),
 	],
