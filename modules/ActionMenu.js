@@ -8,7 +8,11 @@
 //     onSelect(index, item) {...} })
 //
 // data: items (strings, or { title, onSelect }), background (the rail's colour,
-// DarkGray), foreground (the selected action's, White), selection (0), onSelect
+// DarkGray), foreground (the selected action's, White), selection (0), onSelect.
+// Theming (rect): crumb (the dot's colour, default foreground), border (a 1 px
+// line at the rail's right edge, default none), sheet (the item area's colour,
+// default black; on round, the ring's inside). With the app's background as
+// the rail, the rail reads as margin.
 //
 // Measured against the firmware on the emulators: a 16 px rail with a 5 px
 // crumb dot at (6, 10) on rect, a 14 px ring on round; items 47 px apart on
@@ -33,8 +37,8 @@ const REPEAT_MS = 100;
 // the rail's colour to the dot's (measured).
 class CrumbBehavior extends Behavior {
 	onCreate(port, $) {
-		this.color = $.foreground;
-		this.corner = blendToBlack(colorLevels($.background), 2 / 3, colorLevels($.foreground));
+		this.color = $.crumb;
+		this.corner = blendToBlack(colorLevels($.background), 2 / 3, colorLevels($.crumb));
 	}
 	onDraw(port) {
 		port.fillColor(this.color, 1, 0, 3, 1);
@@ -49,6 +53,9 @@ class CrumbBehavior extends Behavior {
 // Round: the black inside of the ring, drawn row by row so its edge is crisp
 // like the firmware's (a RoundRect's would be anti-aliased).
 class RoundInsideBehavior extends Behavior {
+	onCreate(port, $) {
+		this.color = $.sheet;
+	}
 	onDraw(port) {
 		const w = port.width, h = port.height, cx = w / 2, cy = h / 2, r = cx - RING;
 		for (let y = 0; y < h; y++) {
@@ -57,7 +64,7 @@ class RoundInsideBehavior extends Behavior {
 				continue;
 			const half = Math.sqrt(r * r - dy * dy);
 			const x0 = Math.round(cx - half), x1 = Math.round(cx + half);
-			port.fillColor(GColor.Black, x0, y, x1 - x0, 1);
+			port.fillColor(this.color, x0, y, x1 - x0, 1);
 		}
 	}
 }
@@ -80,7 +87,7 @@ class ActionMenuBehavior extends View.Behavior {
 		const bottom = first + PITCH * n;
 		if (!ROUND && bottom > height)
 			first -= Math.max(0, Math.min(first + PITCH * selection + (PITCH >> 1) - middle, bottom - height));
-		let label = container.content(2);
+		let label = container.content(view.border && !ROUND ? 3 : 2);
 		for (let i = 0; label; i++, label = label.next) {
 			let top;
 			if (ROUND) {
@@ -136,7 +143,7 @@ class ActionMenuBehavior extends View.Behavior {
 }
 
 const ActionMenuContainer = Container.template($ => ({
-	skin: new Skin({ fill: GColor.Black }), Behavior: $.constructor.Behavior,
+	skin: new Skin({ fill: $.sheet }), Behavior: $.constructor.Behavior,
 	contents: [
 		ROUND
 			? Content($, { left: 0, right: 0, top: 0, bottom: 0, skin: new Skin({ fill: $.background }) })
@@ -144,6 +151,7 @@ const ActionMenuContainer = Container.template($ => ({
 		ROUND
 			? Port($, { left: 0, right: 0, top: 0, bottom: 0, Behavior: RoundInsideBehavior })
 			: Port($, { left: 6, top: 10, width: 5, height: 5, Behavior: CrumbBehavior }),
+		$.border && !ROUND ? Content($, { left: RAIL - 1, width: 1, top: 0, bottom: 0, skin: new Skin({ fill: $.border }) }) : null,
 		...$.items.map(item => Label($, { left: TEXT_LEFT, right: 0, top: 0, height: 30, style: $.style, string: item.title })),
 	],
 }));
@@ -156,6 +164,9 @@ export default class ActionMenu extends View {
 		this.selection = data.selection ?? 0;
 		this.background = data.background ?? GColor.DarkGray;
 		this.foreground = data.foreground ?? GColor.White;
+		this.crumb = data.crumb ?? this.foreground;
+		this.border = data.border;
+		this.sheet = data.sheet ?? GColor.Black;
 		this.style = new Style({ font: FONT_KEY.GOTHIC_24_BOLD, color: [GColor.DarkGray, this.foreground], horizontal: ROUND ? "center" : "left", vertical: "top", top: 4 });
 	}
 	get Template() { return ActionMenuContainer }

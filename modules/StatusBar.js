@@ -2,12 +2,17 @@
 // displays, measured), transparent over the window.
 //
 //   StatusBar({ color: GColor.Black, dotted: true })
+//   StatusBar({ color: "#FFFFFF", background: "#000000", font: "LECO_20_BOLD_NUMBERS" })
 //
+// font: FONT_KEY.GOTHIC_18 (the default), or "LECO_20_BOLD_NUMBERS" for the
+// digit font StatsScreen uses. background: the bar's fill, transparent by
+// default.
 // dotted: StatusBarLayerSeparatorModeDotted, every other pixel of the row two
 // above the bar's bottom edge (measured at y 18). The clock updates on the
 // onMinuteChanged that pebble-ui/WindowStack distributes.
 import { STATUS_BAR_LAYER_HEIGHT as HEIGHT, FONT_KEY, textLayerStyle, clockString } from "pebble-ui/sdk";
 
+const LECO_20_BOLD_NUMBERS = "bold 20px Leco"; // as in StatsScreen
 const TEXT_TOP = -2; // measured: the digits start at y 5
 
 export { clockString };
@@ -30,10 +35,11 @@ class DottedSeparatorBehavior extends Behavior {
 
 export const StatusBar = Container.template($ => ({
 	left: 0, right: 0, top: 0, height: HEIGHT, Behavior: StatusBarBehavior,
+	...($.background && { skin: new Skin({ fill: $.background }) }),
 	contents: [
 		Label($, {
 			left: 0, right: 0, top: TEXT_TOP, height: HEIGHT,
-			style: textLayerStyle(FONT_KEY.GOTHIC_18, $.color, "center"),
+			style: textLayerStyle($.font === "LECO_20_BOLD_NUMBERS" ? LECO_20_BOLD_NUMBERS : FONT_KEY.GOTHIC_18, $.color, "center"),
 			string: clockString(),
 		}),
 		$.dotted ? Port($, { left: 0, right: 0, top: HEIGHT - 2, height: 1, Behavior: DottedSeparatorBehavior }) : null,

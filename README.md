@@ -96,13 +96,13 @@ the machine's heaps (on the watch the code is read from flash instead).
 | `pebble-ui/View` | a window: `Template` builds it, `Behavior` gets the buttons (`onPressUp/Down/Select/Back`, `onRelease...`); Back pops | subclass |
 | `pebble-ui/Menu` | MenuLayer: `items`, `onSelect(index, item)`, `cellHeight`, `normal` and `highlight` colours, custom `Item` rows; a window, or embedded with `new menu.Template(menu, {...})` | `new Menu({...})` |
 | `pebble-ui/lists` | `CheckboxList` (`checked`, `onChange`, `onSubmit(checked)`) and `RadioList` (`choice`, `onChange`, `onSubmit(choice)`), with the SDK's box, tick and circles | `new CheckboxList({...})` |
-| `pebble-ui/StatusBar` | StatusBarLayer: the time, `color`, `dotted` separator; `clockString()` | `StatusBar({ color })` |
+| `pebble-ui/StatusBar` | StatusBarLayer: the time, `color`, `dotted` separator, `font` (`"LECO_20_BOLD_NUMBERS"` for LECO digits; default Gothic 18), `background` (fill; default transparent); `clockString()` | `StatusBar({ color })` |
 | `pebble-ui/ActionBar` | ActionBarLayer: `up`, `select`, `down` skins, `background` (the window's colour, for the round arc), `color` | `ActionBar({...})`, last in the window |
 | `pebble-ui/ProgressLayer` | a rounded track and fill; `delegate("setProgress", n)` | `ProgressLayer({ width, ... }, { left, top, width, height })` |
 | `pebble-ui/SelectionLayer` | the SDK's selection layer: cells, bump and slide animations, `callbacks` | `SelectionLayer({...}, frame)` |
 | `pebble-ui/dialogs` | `MessageDialog` (sheet slides up), `ChoiceDialog` (icon, question, action bar, `onUp/onSelect/onDown`), `ConfigDialog` (title, icon, body) | `push(ChoiceDialog, {...})` |
 | `pebble-ui/PinWindow` | digits in a SelectionLayer under a title, with the status bar; `onComplete(digits)` | `push(PinWindow, {...})` |
-| `pebble-ui/ActionMenu` | the firmware's action menu: a coloured rail (ring on round), dimmed actions, the selected one lit; closes, then runs `onSelect(index, item)` | `push(ActionMenu, { items, background, onSelect })` |
+| `pebble-ui/ActionMenu` | the firmware's action menu: a coloured rail (ring on round), dimmed actions, the selected one lit; closes, then runs `onSelect(index, item)`; theming: `crumb` (dot colour, default `foreground`), `border` (1 px line at the rail's right edge, default none), `sheet` (item area colour, default black) | `push(ActionMenu, { items, background, onSelect })` |
 | `pebble-ui/StatsScreen` | a LECO clock with a line under it, an optional title, four corner numbers, on a colour; `delegate("update", {...})` | `push(StatsScreen, { center, sub, corners, title, background })` |
 | `pebble-ui/cards` | `CardMenu`: full-screen colour cards with a name and a category, paged by Up and Down | `new CardMenu({ items: [{ title, subtitle, color }], onSelect })` |
 | `pebble-ui/AdjustWindow` | rows of number fields in SelectionLayers with labels; Select moves down a row, Back up, `onComplete()` | `push(AdjustWindow, { title, rows, onComplete })` |
